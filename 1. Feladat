@@ -1,0 +1,2 @@
+Játék
+Egy online játékot kell megvalósítani. A játék lehet mérközés alapú (pl online sakk), egyéni (valamilyen feladat, pálya egyéni végrehajtása), vagy egy közös térben való közös játék (szerepjátékok). Tudni kell a felhasználóknak a szintjéjt, fejlődését kezelni (ranglista, karakterfejlődés, stb). Tudni kell a játékot irányítani, a lebonyolítási szabályokat kezelni
