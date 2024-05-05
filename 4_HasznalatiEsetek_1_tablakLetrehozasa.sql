@@ -2,16 +2,16 @@
 CREATE DATABASE IF NOT EXISTS Jatek;
 USE Jatek;
 
--- Trigger: Kaszt életerő, sebzés módosítója
+-- TRIGGER: Kaszt életerő, sebzés módosítója
 DROP TRIGGER IF EXISTS kaszt_modositok;
 
--- Trigger: Csoport tagokSzama növelése
+-- TRIGGER: Csoport tagokSzama növelése
 DROP TRIGGER IF EXISTS noveles_tagokSzama;
 
--- Trigger: Parbaj létrejöhet -e
+-- TRIGGER: Parbaj létrejöhet -e
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek;
 
--- Trigger: Be tud a lépni a játékos a helyszínre
+-- TRIGGER: Be tud a lépni a játékos a helyszínre
 DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 
 -- TRIGGER: Párbaj követelmény, tapasztalatpont és arany növelése ha létrejön a párbaj
@@ -26,17 +26,20 @@ DROP TRIGGER IF EXISTS check_jatekos_szint
 -- TRIGGER: Jatekos szintje legyen a jatekos tapasztalatPontja / 1000
 DROP TRIGGER IF EXISTS update_jatekos_szint
 
+-- TRIGGER: Jatekos felveszi a felszerelést és az alapján növeli a sebzését és életerejét
+DROP TRIGGER IF EXISTS felszereles_felvetele
+
 -- nincs meg kesz
-    -- szorny felszereles dobasanak triggere
+    -- szorny felszereles dobasanak TRIGGERe
 
-    -- felszerelest levesz trigger
-    -- felszerelest felvesz trigger
+    -- felszerelest levesz TRIGGER
+    -- felszerelest felvesz TRIGGER
 
-    -- felszerelest elad trigger
-    -- felszerelest vesz trigger
-    
-    -- csoportbol kilep trigger
-    -- csoportba belep trigger
+    -- felszerelest elad TRIGGER
+    -- felszerelest vesz TRIGGER
+
+    -- csoportbol kilep TRIGGER
+    -- csoportba belep TRIGGER
 
 
 -- Kaszt tábla létrehozása
@@ -224,7 +227,7 @@ CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
 
 
 
--- Trigger létrehozása a Kaszt táblához
+-- TRIGGER létrehozása a Kaszt táblához
 DELIMITER //
 
 CREATE TRIGGER kaszt_modositok
@@ -245,7 +248,7 @@ END;
 //
 DELIMITER ;
 
--- Trigger létrehozása a Csoport táblához
+-- TRIGGER létrehozása a Csoport táblához
 DELIMITER //
 
 CREATE TRIGGER noveles_tagokSzama
@@ -283,58 +286,41 @@ CREATE TRIGGER check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
 BEFORE INSERT ON Parbaj
 FOR EACH ROW
 BEGIN
-    DECLARE jatekos1_level INT;
-    DECLARE jatekos2_level INT;
-    DECLARE parbajraHivhato_jatekos1 BOOLEAN;
-    DECLARE parbajraHivhato_jatekos2 BOOLEAN;
-    DECLARE helyszin1 INT;
-    DECLARE helyszin2 INT;
+    DECLARE jatekos1_potencial FLOAT;
+    DECLARE jatekos2_potencial FLOAT;
+    DECLARE gyoztesId INT;
+    DECLARE kritikus_tamadas FLOAT;
 
-    -- Kérjük le a két játékos szintjét és helyszínét
-    SELECT szint, parbajraHivhato, helyszinId INTO jatekos1_level, parbajraHivhato_jatekos1, helyszin1
+    -- Kérjük le a két játékos harci potenciálját és kritikus támadását
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos1_potencial
     FROM Jatekos
     WHERE id = NEW.jatekos1Id;
 
-    SELECT szint, parbajraHivhato, helyszinId INTO jatekos2_level, parbajraHivhato_jatekos2, helyszin2
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos2_potencial
     FROM Jatekos
     WHERE id = NEW.jatekos2Id;
 
-    -- Nézzük meg hogy mindkét játékos párbajrahívható -e
-    IF parbajraHivhato_jatekos1 = TRUE AND parbajraHivhato_jatekos2 = TRUE THEN
-        -- Nézzük meg hogy a szintjük különbsége nem nagyobb -e 5-nél és hogy azonos helyszínről jönnek-e
-        IF ABS(jatekos1_level - jatekos2_level) > 5 OR helyszin1 != helyszin2 THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'A Párbaj nem jöhet létre.';
-        ELSE
-            -- Győztes tapasztalatpont és arany növelése
-            DECLARE vesztes_jatekos_szint INT;
-            DECLARE gyoztes_jatekos_tapasztalatpont_noveles INT;
-            DECLARE gyoztes_jatekos_arany_noveles INT;
-            
-            -- Kérjük le a vesztes játékos szintjét
-            SELECT szint INTO vesztes_jatekos_szint
-            FROM Jatekos
-            WHERE id = NEW.gyoztesId;
-
-            -- Számítsuk ki a győztes játékos tapasztalatpontjainak növelését
-            SET gyoztes_jatekos_tapasztalatpont_noveles = vesztes_jatekos_szint * 100;
-
-            -- Számítsuk ki a győztes játékos aranyának növelését
-            SET gyoztes_jatekos_arany_noveles = vesztes_jatekos_szint * 10;
-
-            -- Frissítsük a győztes játékos tapasztalatpontjait és aranyát
-            UPDATE Jatekos
-            SET tapasztalatPont = tapasztalatPont + gyoztes_jatekos_tapasztalatpont_noveles,
-                arany = arany + gyoztes_jatekos_arany_noveles
-            WHERE id = NEW.gyoztesId;
-        END IF;
+    -- Kiválasztjuk a győztest az általad megadott szabályok alapján
+    IF jatekos1_potencial > jatekos2_potencial THEN
+        SET gyoztesId = NEW.jatekos1Id;
     ELSE
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Mindkét játékos alkalmas a Párbajra';
+        SET gyoztesId = NEW.jatekos2Id;
     END IF;
+
+    -- Frissítjük az újonnan beszúrt rekord győztesének azonosítóját
+    SET NEW.gyoztesId = gyoztesId;
+
+    -- Kiszámoljuk a kritikus támadást
+    SET kritikus_tamadas = jatekos1_potencial * 1.2;
+
+    -- Frissítjük a győztes játékos tapasztalatpontjait és aranyát
+    UPDATE Jatekos
+    SET tapasztalatPont = tapasztalatPont + kritikus_tamadas
+    WHERE id = gyoztesId;
 END;
 //
 DELIMITER ;
+
 
 
 DELIMITER //
@@ -359,11 +345,11 @@ END;
 //
 DELIMITER ;
 
--- Parbaj utáni tapasztalatpontkapás trigger
+-- Parbaj utáni tapasztalatpontkapás TRIGGER
 DELIMITER //
 
 
--- Harc trigger (szörny legyőzésekor)
+-- Harc TRIGGER (szörny legyőzésekor)
 DELIMITER //
 
 CREATE TRIGGER check_harc_kovetelmeny_and_harc_szorny_legyozese
@@ -409,7 +395,7 @@ END;
 DELIMITER ;
 
 
--- Trigger létrehozása a Jatekos táblához, Jatekos szintje ne legyen nagyobb mint 100
+-- TRIGGER létrehozása a Jatekos táblához, Jatekos szintje ne legyen nagyobb mint 100
 DELIMITER //
 
 CREATE TRIGGER check_jatekos_szint
@@ -424,7 +410,7 @@ END;
 //
 DELIMITER ;
 
--- Trigger létrehozása a Jatekos táblához
+-- TRIGGER létrehozása a Jatekos táblához
 DELIMITER //
 
 CREATE TRIGGER update_jatekos_szint
@@ -446,7 +432,7 @@ END;
 //
 DELIMITER ;
 
--- Trigger létrehozása az új tapasztalatpont alapján
+-- TRIGGER létrehozása az új tapasztalatpont alapján
 DELIMITER //
 
 CREATE TRIGGER update_jatekos_szint_after_update
@@ -467,3 +453,32 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DELIMITER //
+
+-- Felszereles felvetele TRIGGER
+DELIMITER //
+
+CREATE TRIGGER felszereles_felvetele
+AFTER INSERT ON JatekosFelszereles
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy a felszerelés felvételekor a játékos eleterőjére és sebzésére hat-e
+    DECLARE eletero_modosito INT;
+    DECLARE sebzes_modosito INT;
+    
+    -- Kérjük le a felszerelés tulajdonságait
+    SELECT eletero, sebzes INTO eletero_modosito, sebzes_modosito
+    FROM Felszereles
+    WHERE id = NEW.felszerelesId;
+    
+    -- Frissítjük a játékos eleterőjét és sebzését a felszerelés tulajdonságai alapján
+    UPDATE Jatekos
+    SET eletero = eletero + eletero_modosito,
+        sebzes = sebzes + sebzes_modosito
+    WHERE id = NEW.jatekosId;
+END;
+//
+DELIMITER ;
+
+
