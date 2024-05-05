@@ -116,3 +116,20 @@ INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
 (2, 4),
 (1, 3);
 
+-- Példa adatok beillesztése a Harcol táblába
+INSERT INTO Harcol (jatekos1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
+VALUES
+(1, 1, 1, 1, '2015-06-15 09:30:00'),
+(2, 3, 2, 2, '2020-04-20 14:45:00'),
+(3, 2, 3, 3, '2015-09-02 11:20:00'),
+(4, 4, 1, 4, '2016-11-10 13:10:00'),
+(5, 5, 2, 5, '2017-08-25 10:00:00');
+
+-- Példa adatok beillesztése a Parbaj táblába
+INSERT INTO Parbaj (jatekos1Id, jatekos2Id, helyszinId, gyoztesId, parbajIdeje)
+VALUES
+(1, 2, 1, 1, '2015-06-16 10:00:00'),
+(3, 4, 2, 3, '2020-04-21 15:00:00'),
+(2, 5, 3, 5, '2013-09-03 12:00:00'),
+(4, 1, 1, 4, '2010-11-11 14:00:00'),
+(5, 3, 2, 5, '2011-08-26 11:00:00');
