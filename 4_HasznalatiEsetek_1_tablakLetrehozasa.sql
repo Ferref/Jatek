@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     sebzes INT NOT NULL,
     eletero INT NOT NULL,
     minimumSzint INT DEFAULT 1,
-    kategoria INT NOT NULL,
+    kategoriaId INT NOT NULL CHECK (kategoriaId BETWEEN 1 AND 9),
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
 );
 
