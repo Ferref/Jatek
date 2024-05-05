@@ -38,6 +38,9 @@ DROP TRIGGER IF EXISTS csoportbol_kilep;
 -- TRIGGER: Játekos belép egy csoportba
 DROP TRIGGER IF EXISTS csoportba_belep;
 
+-- TRIGGER: Játekos helyszint akar változtatni
+DROP TRIGGER IF EXISTS helyszin_valtoztatas;
+
 
 -- nincs meg kesz
     -- szorny felszereles dobasanak TRIGGERe
@@ -586,6 +589,35 @@ BEGIN
         UPDATE Csoport
         SET tagokSzama = tagokSzama + 1
         WHERE id = NEW.csoportId;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- TRIGGER létrehozása a Jatekos táblához
+DELIMITER //
+
+CREATE TRIGGER helyszin_valtoztatas
+BEFORE UPDATE ON Jatekos
+FOR EACH ROW
+BEGIN
+    DECLARE jatekos_szint INT;
+    DECLARE helyszin_min_szint INT;
+
+    -- Kérjük le a játékos aktuális szintjét és a helyszín minimális szintjét
+    SELECT NEW.szint INTO jatekos_szint;
+    SELECT minimumSzint INTO helyszin_min_szint
+    FROM Helyszin
+    WHERE id = NEW.helyszinId;
+
+    -- Ellenőrizzük, hogy a játékosnak megvan-e a szükséges szintje a helyszínváltáshoz
+    IF jatekos_szint >= helyszin_min_szint THEN
+        -- Engedélyezzük a helyszín módosítását
+        SET NEW.szint = jatekos_szint + 1;
+    ELSE
+        -- Visszautasítjuk a helyszín módosítását és jelezzük a hibát
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Nincs meg a megfelelő szint a helyszínváltáshoz.';
     END IF;
 END;
 //
