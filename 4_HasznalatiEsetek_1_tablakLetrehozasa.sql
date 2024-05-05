@@ -27,9 +27,9 @@ DROP TRIGGER IF EXISTS check_jatekos_szint
 DROP TRIGGER IF EXISTS update_jatekos_szint
 
 -- nincs meg kesz
--- vasarlas trigger
--- felszereles trigger
--- bolt elad, vasarol trigger
+    -- vasarlas trigger
+    -- felszereles trigger
+    -- bolt elad, vasarol trigger
 
 
 -- Kaszt tábla létrehozása
@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     sebzes INT NOT NULL,
     eletero INT NOT NULL,
     minimumSzint INT DEFAULT 1,
+    kategoria INT NOT NULL,
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
 );
 
