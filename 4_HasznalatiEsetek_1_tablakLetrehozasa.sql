@@ -12,7 +12,7 @@ DROP TRIGGER IF EXISTS kaszt_modositok;
 DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 
 -- TRIGGER: Párbaj
-DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
+DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles;
 
 -- TRIGGER: Harc szörny ellen
 DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_szorny_legyozese;
@@ -86,8 +86,7 @@ CREATE TABLE IF NOT EXISTS Szerver (
 -- Csoport tábla létrehozása
 CREATE TABLE IF NOT EXISTS Csoport (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
-    CONSTRAINT check_tagokSzama CHECK (tagokSzama <= 4)
+    nev VARCHAR(100) NOT NULL
 );
 
 -- Bolt tábla létrehozása
@@ -115,15 +114,15 @@ CREATE TABLE IF NOT EXISTS Jatekos (
     nem CHAR(1) NOT NULL,
     kasztId INT,
     tapasztalatPont INT DEFAULT 0,
-    szint INT DEFAULT 1,
-    eletero INT DEFAULT 1000,
-    sebzes INT DEFAULT 1000,
+    szint INT DEFAULT 1 CHECK (szint <= 100),
+    eletero INT DEFAULT 100,
+    sebzes INT DEFAULT 10,
     parbajraHivhato BOOLEAN DEFAULT FALSE,
     csoportId INT,
     arany INT DEFAULT 0,
     online BOOLEAN DEFAULT TRUE,
     helyszinId INT,
-    csapatBonusz FLOAT DEFAULT 1.0, -- Hozzáadott oszlop
+    csapatBonusz FLOAT DEFAULT 1.0,
     FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
     FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE,
@@ -250,85 +249,12 @@ END;
 //
 DELIMITER ;
 
--- TRIGGER létrehozása a Csoport táblához
-DELIMITER //
+-- TRIGGER létrehozása a Parbaj táblához
 
--- Párbaj követelmények tigger: szint, parbajraHivhato, helyszin 
--- Párbaj követelmények és győzelem utáni tapasztalatpont trigger
-DELIMITER //
-
-CREATE TRIGGER check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
-BEFORE INSERT ON Parbaj
-FOR EACH ROW
-BEGIN
-    DECLARE jatekos1_potencial FLOAT;
-    DECLARE jatekos2_potencial FLOAT;
-    DECLARE gyoztesId INT;
-    DECLARE kritikus_tamadas FLOAT;
-
-    -- Kérjük le a két játékos harci potenciálját és kritikus támadását
-    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos1_potencial
-    FROM Jatekos
-    WHERE id = NEW.jatekos1Id;
-
-    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos2_potencial
-    FROM Jatekos
-    WHERE id = NEW.jatekos2Id;
-
-    -- Kiválasztjuk a győztest az általad megadott szabályok alapján
-    IF jatekos1_potencial > jatekos2_potencial THEN
-        SET gyoztesId = NEW.jatekos1Id;
-    ELSE
-        SET gyoztesId = NEW.jatekos2Id;
-    END IF;
-
-    -- Frissítjük az újonnan beszúrt rekord győztesének azonosítóját
-    SET NEW.gyoztesId = gyoztesId;
-
-    -- Kiszámoljuk a kritikus támadást
-    SET kritikus_tamadas = jatekos1_potencial * 1.2;
-
-    -- Frissítjük a győztes játékos tapasztalatpontjait és aranyát
-    UPDATE Jatekos
-    SET tapasztalatPont = tapasztalatPont + kritikus_tamadas
-    WHERE id = gyoztesId;
-END;
-//
-DELIMITER ;
-
-
-
-DELIMITER //
-
-CREATE TRIGGER check_helyszin_minimum_szint
-BEFORE INSERT ON Jatekos
-FOR EACH ROW
-BEGIN
-    DECLARE helyszin_min_szint INT;
-
-    -- Kérjük le a helyszín minimális szintjét
-    SELECT minimumSzint INTO helyszin_min_szint
-    FROM Helyszin
-    WHERE id = NEW.helyszinId;
-
-    -- Ellenőrizzük, hogy a helyszín minimális szintje kisebb vagy egyenlő-e a játékos szintjével
-    IF helyszin_min_szint > NEW.szint THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'A helyszín minimális szintje magasabb, mint a játékos szintje.';
-    END IF;
-END;
-//
-DELIMITER ;
-
--- Parbaj utáni tapasztalatpontkapás TRIGGER
-DELIMITER //
-
-
--- TRIGGER a szörny ellen harchoz
 DELIMITER //
 
 CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
-AFTER INSERT ON Harcol
+BEFORE INSERT ON Harcol
 FOR EACH ROW
 BEGIN
     DECLARE jatekos_potencial FLOAT;
@@ -342,6 +268,7 @@ BEGIN
     DECLARE felszereles_id INT;
     DECLARE tapasztalatPontAd INT;
     DECLARE aranyAd INT;
+    DECLARE csoportTagokSzama INT;
 
     -- Kérjük le a játékos harci potenciálját
     SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos_potencial
@@ -392,9 +319,158 @@ BEGIN
         FROM Szorny
         WHERE id = NEW.szornyId;
 
-        -- Frissítjük a játékos tapasztalatpontjait
+        -- Kérjük le az adott csoport számát, amibe a játékos tartozik
+        SELECT COUNT(*) INTO csoportTagokSzama
+        FROM CsoportTagok
+        WHERE csoportId = NEW.csoportId;
+
+        -- Számoljuk ki, hogy hány százalékkal nőjön a tapasztalatpontokból kapott összeg
+        SET tapasztalatPontAd = tapasztalatPontAd * (1 + (csoportTagokSzama - 1) * 0.05);
+
+        -- Adjuk hozzá a tapasztalatpontot a játékoshoz
         UPDATE Jatekos
-        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd * csoportBonusz;
+        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd
+        WHERE id = NEW.jatekos1Id;
+
+        -- Adjunk hozzá aranyat a játékosnak
+        SET aranyAd = NEW.aranyMennyiseg;
+
+        -- Adjuk hozzá az aranyat a játékoshoz
+        UPDATE Jatekos
+        SET arany = arany + aranyAd
+        WHERE id = NEW.jatekos1Id;
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER //
+
+-- TRIGGER létrehozása a Jatekos táblához
+DELIMITER //
+
+CREATE TRIGGER check_helyszin_minimum_szint
+BEFORE INSERT ON Jatekos
+FOR EACH ROW
+BEGIN
+    DECLARE helyszin_min_szint INT;
+
+    -- Kérjük le a helyszín minimális szintjét
+    SELECT minimumSzint INTO helyszin_min_szint
+    FROM Helyszin
+    WHERE id = NEW.helyszinId;
+
+    -- Ellenőrizzük, hogy a helyszín minimális szintje kisebb vagy egyenlő-e a játékos szintjével
+    IF helyszin_min_szint > NEW.szint THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'A helyszín minimális szintje magasabb, mint a játékos szintje.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- TRIGGER létrehozása a Jatekos táblához, Jatekos szintje ne legyen nagyobb mint 100
+DELIMITER //
+
+CREATE TRIGGER check_jatekos_szint
+BEFORE INSERT ON Jatekos
+FOR EACH ROW
+BEGIN
+    IF NEW.szint > 100 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'A játékos szintje nem lehet nagyobb, mint 100.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Parbaj utáni tapasztalatpontkapás TRIGGER
+DELIMITER //
+
+
+-- TRIGGER a szörny ellen harchoz
+DELIMITER //
+
+CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
+BEFORE INSERT ON Harcol
+FOR EACH ROW
+BEGIN
+    DECLARE jatekos_potencial FLOAT;
+    DECLARE szorny_potencial FLOAT;
+    DECLARE jatekos_tamadas FLOAT;
+    DECLARE szorny_tamadas FLOAT;
+    DECLARE jatekos_kritikus_tamadas FLOAT;
+    DECLARE szorny_kritikus_tamadas FLOAT;
+    DECLARE gyoztesId INT;
+    DECLARE szorny_felsz_id INT;
+    DECLARE felszereles_id INT;
+    DECLARE tapasztalatPontAd INT;
+    DECLARE aranyAd INT;
+    DECLARE csoportTagokSzama INT; -- új változó a csoporttagok számához
+
+    -- Kérjük le a játékos harci potenciálját
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos_potencial
+    FROM Jatekos
+    WHERE id = NEW.jatekos1Id;
+
+    -- Kérjük le a szörny harci potenciálját
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO szorny_potencial
+    FROM Szorny
+    WHERE id = NEW.szornyId;
+
+    -- Kiszámoljuk a támadásokat
+    SET jatekos_tamadas = jatekos_potencial * (1 + RAND() * 0.4 - 0.2);
+    SET szorny_tamadas = szorny_potencial * (1 + RAND() * 0.4 - 0.2);
+
+    -- Kiszámoljuk a kritikus támadásokat
+    SET jatekos_kritikus_tamadas = jatekos_tamadas * (1 + RAND() * 0.4 - 0.2);
+    SET szorny_kritikus_tamadas = szorny_tamadas * (1 + RAND() * 0.4 - 0.2);
+
+    -- Kiválasztjuk a győztest
+    IF jatekos_kritikus_tamadas > szorny_kritikus_tamadas THEN
+        SET gyoztesId = NEW.jatekos1Id;
+    ELSE
+        SET gyoztesId = NEW.szornyId;
+    END IF;
+
+    -- Frissítjük az újonnan beszúrt rekord győztesének azonosítóját
+    SET NEW.gyoztesId = gyoztesId;
+
+    -- Ha a győztes a játékos, akkor dobunk felszerelést a szörny által
+    IF gyoztesId = NEW.jatekos1Id THEN
+        -- Véletlenszerűen válasszunk egy felszerelést a SzornyFelszDobhat táblából
+        SELECT felszId INTO felszereles_id
+        FROM SzornyFelszDobhat
+        WHERE szornyId = NEW.szornyId
+        ORDER BY RAND()
+        LIMIT 1;
+
+        -- Ellenőrizzük, hogy valóban létezik-e felszerelés, amit dobhat a szörny
+        IF felszereles_id IS NOT NULL THEN
+            -- Ha igen, akkor adjuk hozzá a felszerelést a játékoshoz
+            INSERT INTO JatekosFelszereles (jatekosId, felszerelesId, felveve)
+            VALUES (NEW.jatekos1Id, felszereles_id, FALSE);
+        END IF;
+
+        -- Kérjük le a szörny által adott tapasztalatpontot
+        SELECT tapasztalatPontotAd INTO tapasztalatPontAd
+        FROM Szorny
+        WHERE id = NEW.szornyId;
+
+        -- Kérjük le a játékos csoportjába tartozó játékosok számát
+        SELECT COUNT(*) INTO csoportTagokSzama
+        FROM Jatekos
+        WHERE csoportId = (SELECT csoportId FROM Jatekos WHERE id = NEW.jatekos1Id);
+
+        -- Frissítjük a játékos tapasztalatpontjait a csoporttagok számának megfelelően
+        UPDATE Jatekos
+        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd * csoportTagokSzama
         WHERE id = gyoztesId;
 
         -- Kérjük le a szörny által adható aranyat
@@ -415,73 +491,29 @@ END;
 DELIMITER ;
 
 
-
--- TRIGGER létrehozása a Jatekos táblához, Jatekos szintje ne legyen nagyobb mint 100
-DELIMITER //
-
-CREATE TRIGGER check_jatekos_szint
-BEFORE INSERT ON Jatekos
-FOR EACH ROW
-BEGIN
-    IF NEW.szint > 100 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'A játékos szintje nem lehet nagyobb, mint 100.';
-    END IF;
-END;
-//
-DELIMITER ;
-
 -- TRIGGER létrehozása a Jatekos táblához
 DELIMITER //
 
 CREATE TRIGGER update_jatekos_szint
-AFTER INSERT ON Jatekos
+BEFORE INSERT ON Jatekos
 FOR EACH ROW
 BEGIN
-    -- Számítsuk ki az új szintet a tapasztalatpont alapján
     DECLARE uj_szint INT;
-    SET uj_szint = NEW.tapasztalatPont / 1000;
-
-    -- Ellenőrizzük, hogy ne legyen nagyobb, mint 100
-    IF uj_szint <= 100 THEN
-        -- Frissítsük a játékos szintjét
-        UPDATE Jatekos
-        SET szint = uj_szint
-        WHERE id = NEW.id;
+    
+    SET uj_szint = FLOOR(1 + LOG2(NEW.tapasztalatPont));
+    
+    IF NEW.szint < uj_szint THEN
+        SET NEW.szint = uj_szint;
     END IF;
 END;
 //
 DELIMITER ;
-
--- TRIGGER létrehozása az új tapasztalatpont alapján
-DELIMITER //
-
-CREATE TRIGGER update_jatekos_szint_after_update
-AFTER UPDATE ON Jatekos
-FOR EACH ROW
-BEGIN
-    -- Számítsuk ki az új szintet a tapasztalatpont alapján
-    DECLARE uj_szint INT;
-    SET uj_szint = NEW.tapasztalatPont / 1000;
-
-    -- Ellenőrizzük, hogy ne legyen nagyobb, mint 100
-    IF uj_szint <= 100 THEN
-        -- Frissítsük a játékos szintjét
-        UPDATE Jatekos
-        SET szint = uj_szint
-        WHERE id = NEW.id;
-    END IF;
-END;
-//
-DELIMITER ;
-
-DELIMITER //
 
 -- Felszereles felvesz TRIGGER
 DELIMITER //
 
 CREATE TRIGGER felszereles_felvesz
-AFTER INSERT ON JatekosFelszereles
+BEFORE INSERT ON JatekosFelszereles
 FOR EACH ROW
 BEGIN
     -- Ellenőrizzük, hogy a felszerelés felvételekor a játékos eleterőjére és sebzésére hat-e
@@ -502,9 +534,8 @@ END;
 //
 DELIMITER ;
 
--- TRIGGER létrehozása a Csoport táblához
 DELIMITER //
-
+-- Trigger a csoportagok táblához
 CREATE TRIGGER check_csoport_tagok_szama
 BEFORE INSERT ON Csoport
 FOR EACH ROW
@@ -530,23 +561,19 @@ DELIMITER ;
 DELIMITER //
 
 CREATE TRIGGER felszereles_levesz
-BEFORE UPDATE ON JatekosFelszereles
+BEFORE DELETE ON Karakter_Felszereles
 FOR EACH ROW
 BEGIN
-    -- Ellenőrizzük, hogy a felszerelés levetésekor a játékos eleterőjére és sebzésére hat-e
-    DECLARE eletero_modosito INT;
-    DECLARE sebzes_modosito INT;
+    DECLARE fegyver_kod INT;
     
-    -- Kérjük le a felszerelés tulajdonságait
-    SELECT eletero, sebzes INTO eletero_modosito, sebzes_modosito
+    -- Kivonjuk a karakter sebzését a fegyver sebzéséből
+    SELECT fegyverId INTO fegyver_kod
     FROM Felszereles
     WHERE id = OLD.felszerelesId;
-    
-    -- Frissítjük a játékos eleterőjét és sebzését a felszerelés tulajdonságai alapján
-    UPDATE Jatekos
-    SET eletero = eletero - eletero_modosito,
-        sebzes = sebzes - sebzes_modosito
-    WHERE id = OLD.jatekosId;
+
+    UPDATE Karakter
+    SET sebzes = sebzes - (SELECT sebzes FROM Fegyver WHERE kod = fegyver_kod)
+    WHERE id = OLD.karakterId;
 END;
 //
 DELIMITER ;
@@ -555,25 +582,45 @@ DELIMITER ;
 DELIMITER //
 
 CREATE TRIGGER csoportbol_kilep
-AFTER DELETE ON Jatekos
+BEFORE DELETE ON Csoport_Tag
 FOR EACH ROW
 BEGIN
-    -- Ellenőrizzük, hogy a játékosnak van-e csoporttagsága
-    IF OLD.csoportId IS NOT NULL THEN
-        -- Frissítjük a csoport tagjainak számát
-        UPDATE Csoport
-        SET tagokSzama = tagokSzama - 1
-        WHERE id = OLD.csoportId;
-    END IF;
+    DECLARE tagokSzama INT;
+    
+    -- Csökkentjük a csoport tagjainak számát
+    SELECT COUNT(*) INTO tagokSzama
+    FROM Csoport_Tag
+    WHERE csoportId = OLD.csoportId;
+
+    UPDATE Csoport
+    SET tagokSzama = tagokSzama
+    WHERE id = OLD.csoportId;
+END;
+//
+CREATE TRIGGER csoportba_belep
+BEFORE INSERT ON Csoport_Tag
+FOR EACH ROW
+BEGIN
+    DECLARE tagokSzama INT;
+    
+    -- Növeljük a csoport tagjainak számát
+    SELECT COUNT(*) INTO tagokSzama
+    FROM Csoport_Tag
+    WHERE csoportId = NEW.csoportId;
+
+    UPDATE Csoport
+    SET tagokSzama = tagokSzama
+    WHERE id = NEW.csoportId;
 END;
 //
 DELIMITER ;
+
 
 -- TRIGGER létrehozása a Jatekos táblához
 DELIMITER //
 
 CREATE TRIGGER csoportba_belep
-AFTER INSERT ON Jatekos
+BEFORE INSERT ON Jatekos
 FOR EACH ROW
 BEGIN
     -- Ellenőrizzük, hogy az újonnan beszúrt játékosnak van-e csoportja
@@ -603,12 +650,8 @@ BEGIN
     FROM Helyszin
     WHERE id = NEW.helyszinId;
 
-    -- Ellenőrizzük, hogy a játékosnak megvan-e a szükséges szintje a helyszínváltáshoz
-    IF jatekos_szint >= helyszin_min_szint THEN
-        -- Engedélyezzük a helyszín módosítását
-        SET NEW.szint = jatekos_szint + 1;
-    ELSE
-        -- Visszautasítjuk a helyszín módosítását és jelezzük a hibát
+    -- Ellenőrizzük, hogy a játékosnak megfelel-e a szintje a helyszínváltáshoz
+    IF jatekos_szint < helyszin_min_szint THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Nincs meg a megfelelő szint a helyszínváltáshoz.';
     END IF;
@@ -616,11 +659,12 @@ END;
 //
 DELIMITER ;
 
+
 -- TRIGGER létrehozása a BoltFelszereles táblához
 DELIMITER //
 
 CREATE TRIGGER felszereles_elad
-AFTER INSERT ON BoltFelszereles
+BEFORE INSERT ON BoltFelszereles
 FOR EACH ROW
 BEGIN
     -- Ellenőrizzük, hogy a felszerelés eladható-e
@@ -642,7 +686,7 @@ DELIMITER ;
 DELIMITER //
 
 CREATE TRIGGER felszereles_vasarol
-AFTER INSERT ON BoltFelszereles
+BEFORE INSERT ON BoltFelszereles
 FOR EACH ROW
 BEGIN
     -- Ellenőrizzük, hogy a játékosnak megfelelő-e a szintje a felszerelés vásárlásához
@@ -656,36 +700,10 @@ BEGIN
     FROM Felszereles
     WHERE id = NEW.felszerelesId;
 
-    -- Ellenőrizzük, hogy a játékosnak van-e elegendő aranya a felszerelés vásárlásához
-    IF (SELECT arany FROM Jatekos WHERE id = NEW.jatekosId) >= (SELECT ar FROM Felszereles WHERE id = NEW.felszerelesId) THEN
-        -- Ellenőrizzük, hogy a játékosnak megfelelő-e a szintje a felszerelés vásárlásához
-        IF jatekos_szint >= felszereles_min_szint THEN
-            -- Beszúrjuk a vásárolt felszerelést a JatekosFelszereles táblába
-            INSERT INTO JatekosFelszereles (jatekosId, felszerelesId, felveve)
-            VALUES (NEW.jatekosId, NEW.felszerelesId, TRUE);
-
-            -- Kiválasztjuk a felszerelés árát
-            SELECT ar INTO felsz_id
-            FROM Felszereles
-            WHERE id = NEW.felszerelesId;
-
-            -- Csökkentjük a játékos aranyát a felszerelés árával
-            UPDATE Jatekos
-            SET arany = arany - felsz_id
-            WHERE id = NEW.jatekosId;
-
-            -- Töröljük a felszerelést a boltból
-            DELETE FROM BoltFelszereles
-            WHERE boltId = NEW.boltId AND felszerelesId = NEW.felszerelesId;
-        ELSE
-            -- Jelezzük a hibát, hogy a játékosnak nincs megfelelő szintje a felszerelés vásárlásához
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Nincs megfelelő szinted a felszerelés vásárlásához.';
-        END IF;
-    ELSE
-        -- Jelezzük a hibát, hogy a játékosnak nincs elegendő aranya a felszerelés vásárlásához
+    -- Ellenőrizzük, hogy a játékos szintje megfelel-e a felszerelés vásárlásához
+    IF jatekos_szint < felszereles_min_szint THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Nincs elegendő aranyad a felszerelés vásárlásához.';
+        SET MESSAGE_TEXT = 'A játékos szintje nem megfelelő a felszerelés vásárlásához.';
     END IF;
 END;
 //
