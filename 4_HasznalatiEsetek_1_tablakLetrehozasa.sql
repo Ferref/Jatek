@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS Szerver (
 CREATE TABLE IF NOT EXISTS Csoport (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL,
-    tagokSzama INT DEFAULT 0
+    tagokSzama INT DEFAULT 0,
+    CONSTRAINT check_tagokSzama CHECK (tagokSzama <= 4)
 );
 
 -- Bolt tábla létrehozása
