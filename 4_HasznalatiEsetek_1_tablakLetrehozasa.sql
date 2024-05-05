@@ -27,7 +27,11 @@ DROP TRIGGER IF EXISTS check_jatekos_szint;
 DROP TRIGGER IF EXISTS update_jatekos_szint;
 
 -- TRIGGER: Jatekos felveszi a felszerelést és az alapján növeli a sebzését és életerejét
-DROP TRIGGER IF EXISTS felszereles_felvetele;
+DROP TRIGGER IF EXISTS felszereles_felvesz;
+
+-- TRIGGER: Jatekos leveszi a felszerelést és az alapján csökkenti a sebzését és életerejét
+DROP TRIGGER IF EXISTS felszereles_levesz;
+
 
 -- nincs meg kesz
     -- szorny felszereles dobasanak TRIGGERe
@@ -474,10 +478,10 @@ DELIMITER ;
 
 DELIMITER //
 
--- Felszereles felvetele TRIGGER
+-- Felszereles felvesz TRIGGER
 DELIMITER //
 
-CREATE TRIGGER felszereles_felvetele
+CREATE TRIGGER felszereles_felvesz
 AFTER INSERT ON JatekosFelszereles
 FOR EACH ROW
 BEGIN
@@ -518,6 +522,32 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Egy csoportban nem lehet több mint 4 játékos.';
     END IF;
+END;
+//
+DELIMITER ;
+
+
+-- Felszereles levesz TRIGGER
+DELIMITER //
+
+CREATE TRIGGER felszereles_levesz
+BEFORE UPDATE ON JatekosFelszereles
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy a felszerelés levetésekor a játékos eleterőjére és sebzésére hat-e
+    DECLARE eletero_modosito INT;
+    DECLARE sebzes_modosito INT;
+    
+    -- Kérjük le a felszerelés tulajdonságait
+    SELECT eletero, sebzes INTO eletero_modosito, sebzes_modosito
+    FROM Felszereles
+    WHERE id = OLD.felszerelesId;
+    
+    -- Frissítjük a játékos eleterőjét és sebzését a felszerelés tulajdonságai alapján
+    UPDATE Jatekos
+    SET eletero = eletero - eletero_modosito,
+        sebzes = sebzes - sebzes_modosito
+    WHERE id = OLD.jatekosId;
 END;
 //
 DELIMITER ;
