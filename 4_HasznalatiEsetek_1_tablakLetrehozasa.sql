@@ -1,13 +1,38 @@
+-- Adatbázis létrehozása ha nem létezik
 CREATE DATABASE IF NOT EXISTS Jatek;
 USE Jatek;
+
+-- kaszt_modosító trigger eldobása ha már létezik
+DROP TRIGGER IF EXISTS kaszt_modositok;
 
 -- Kaszt tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kaszt (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL,
-    eleteroModosito INT NOT NULL,
-    sebzesModosito INT NOT NULL
+    eleteroModosito INT,
+    sebzesModosito INT
 );
+
+-- Trigger létrehozása a Kaszt táblához
+DELIMITER //
+CREATE TRIGGER kaszt_modositok
+BEFORE INSERT ON Kaszt
+FOR EACH ROW
+BEGIN
+    IF NEW.id = 1 THEN
+        SET NEW.sebzesModosito = 50;
+        SET NEW.eleteroModosito = 100;
+    ELSEIF NEW.id = 2 THEN
+        SET NEW.sebzesModosito = 75;
+        SET NEW.eleteroModosito = 75;
+    ELSEIF NEW.id = 3 THEN
+        SET NEW.sebzesModosito = 50;
+        SET NEW.eleteroModosito = 100;
+    END IF;
+END;
+//
+DELIMITER ;
+
 
 -- Kepesseg tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kepesseg (
@@ -57,6 +82,7 @@ CREATE TABLE IF NOT EXISTS Bolt (
 CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
     szerverId INT,
     felhasznaloId INT,
+    redDate DATETIME DEFAULT NOW(),
     FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
     FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
     PRIMARY KEY (szerverId, felhasznaloId)
@@ -165,3 +191,22 @@ CREATE TABLE IF NOT EXISTS Parbaj (
     FOREIGN KEY (helyszinId) REFERENCES Helyszin(id) ON DELETE CASCADE,
     FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
 );
+
+
+-- Példa adatok beillesztése a Harcol táblába
+INSERT INTO Harcol (jatekos1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
+VALUES
+(1, 1, 1, 1, '2015-06-15 09:30:00'),
+(2, 3, 2, 2, '2020-04-20 14:45:00'),
+(3, 2, 3, 3, '2015-09-02 11:20:00'),
+(4, 4, 1, 4, '2016-11-10 13:10:00'),
+(5, 5, 2, 5, '2017-08-25 10:00:00');
+
+-- Példa adatok beillesztése a Parbaj táblába
+INSERT INTO Parbaj (jatekos1Id, jatekos2Id, helyszinId, gyoztesId, parbajIdeje)
+VALUES
+(1, 2, 1, 1, '2015-06-16 10:00:00'),
+(3, 4, 2, 3, '2020-04-21 15:00:00'),
+(2, 5, 3, 5, '2013-09-03 12:00:00'),
+(4, 1, 1, 4, '2010-11-11 14:00:00'),
+(5, 3, 2, 5, '2011-08-26 11:00:00');
