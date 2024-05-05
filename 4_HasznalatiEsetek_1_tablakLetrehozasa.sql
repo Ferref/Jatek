@@ -40,6 +40,13 @@ CREATE TABLE IF NOT EXISTS Szerver (
     nev VARCHAR(100) NOT NULL
 );
 
+-- FelhasznaloSzerver tábla létrehozása
+CREATE TABLE IF NOT EXISTS Szerver (
+    szerverID INT NOT NULL,
+    felhasznaloId INT NOT NULL,
+    PRIMARY key (szerverId, felhasznaloId)
+);
+
 -- Csoport tábla létrehozása
 CREATE TABLE IF NOT EXISTS Csoport (
     id INT AUTO_INCREMENT PRIMARY KEY,
