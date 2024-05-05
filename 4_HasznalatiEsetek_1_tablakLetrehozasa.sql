@@ -18,7 +18,7 @@ DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
 
 -- TRIGGER: Harc szörny ellen. Ha nyerünk tp, ararny, felszereles?
-DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_harc_szorny_legyozese;
+DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_szorny_legyozese;
 
 -- TRIGGER: Jatekos szintje nem lehet nagyobb mint 100
 DROP TRIGGER IF EXISTS check_jatekos_szint;
@@ -334,7 +334,7 @@ DELIMITER //
 -- TRIGGER a szörny ellen harchoz
 DELIMITER //
 
-CREATE TRIGGER check_harc_kovetelmeny_and_harc_szorny_legyozese
+CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
 AFTER INSERT ON Harcol
 FOR EACH ROW
 BEGIN
@@ -401,7 +401,7 @@ BEGIN
 
         -- Frissítjük a játékos tapasztalatpontjait
         UPDATE Jatekos
-        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd
+        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd * csoportBonusz;
         WHERE id = gyoztesId;
 
         -- Kérjük le a szörny által adható aranyat
