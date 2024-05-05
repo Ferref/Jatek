@@ -5,6 +5,23 @@ USE Jatek;
 -- kaszt_modosító trigger eldobása ha már létezik
 DROP TRIGGER IF EXISTS kaszt_modositok;
 
+-- Csoport tagokSzama trigger eldobása ha már létezik
+DROP TIGGER IF EXISTS noveles_tagokSzama;
+
+-- Parbaj ellenörző-trigger eldobása ha már létezik +++ ha azonos helyen vannak
+DROP TIGGER IF EXISTS ellenoriz_parbaj_kovetelmenyek;
+
+-- Helyszin Trigger hogy be tud e lepni
+-- Parbaj tigger 2 amivel tp-t, aranyat kapunk
+-- Harc trigger (ha azonos helyen vannak)
+-- szintNoveloTrigger
+-- vasarlas trigger
+-- felszereles trigger
+-- bolt elad, vasarol trigger
+
+-- 
+DROP TRIGGER IF EXISTS check_parbaj_requirements
+
 -- Kaszt tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kaszt (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -12,27 +29,6 @@ CREATE TABLE IF NOT EXISTS Kaszt (
     eleteroModosito INT,
     sebzesModosito INT
 );
-
--- Trigger létrehozása a Kaszt táblához
-DELIMITER //
-CREATE TRIGGER kaszt_modositok
-BEFORE INSERT ON Kaszt
-FOR EACH ROW
-BEGIN
-    IF NEW.id = 1 THEN
-        SET NEW.sebzesModosito = 50;
-        SET NEW.eleteroModosito = 100;
-    ELSEIF NEW.id = 2 THEN
-        SET NEW.sebzesModosito = 75;
-        SET NEW.eleteroModosito = 75;
-    ELSEIF NEW.id = 3 THEN
-        SET NEW.sebzesModosito = 50;
-        SET NEW.eleteroModosito = 100;
-    END IF;
-END;
-//
-DELIMITER ;
-
 
 -- Kepesseg tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kepesseg (
@@ -192,5 +188,79 @@ CREATE TABLE IF NOT EXISTS Parbaj (
     FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
 );
 
+
+-- Trigger létrehozása a Kaszt táblához
+DELIMITER //
+CREATE TRIGGER kaszt_modositok
+BEFORE INSERT ON Kaszt
+FOR EACH ROW
+BEGIN
+    IF NEW.id = 1 THEN
+        SET NEW.sebzesModosito = 50;
+        SET NEW.eleteroModosito = 100;
+    ELSEIF NEW.id = 2 THEN
+        SET NEW.sebzesModosito = 75;
+        SET NEW.eleteroModosito = 75;
+    ELSEIF NEW.id = 3 THEN
+        SET NEW.sebzesModosito = 50;
+        SET NEW.eleteroModosito = 100;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Trigger létrehozása a Csoport táblához
+DELIMITER //
+CREATE TRIGGER noveles_tagokSzama
+AFTER INSERT ON Jatekos
+FOR EACH ROW
+BEGIN
+    IF NEW.csoportId IS NOT NULL THEN
+        UPDATE Csoport
+        SET tagokSzama = tagokSzama + 1
+        WHERE id = NEW.csoportId;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Trigger létrehozása a Péárbaj táblához
+-- Create trigger if not exists
+DROP TRIGGER IF EXISTS check_parbaj_requirements;
+
+DELIMITER //
+
+CREATE TRIGGER ellenoriz_parbaj_kovetelmenyek
+BEFORE INSERT ON Parbaj
+FOR EACH ROW
+BEGIN
+    DECLARE jatekos1_level INT;
+    DECLARE jatekos2_level INT;
+    DECLARE parbajraHivhato_jatekos1 BOOLEAN;
+    DECLARE parbajraHivhato_jatekos2 BOOLEAN;
+
+    -- Kérjük le a két játékos szintjét
+    SELECT szint, parbajraHivhato INTO jatekos1_level, parbajraHivhato_jatekos1
+    FROM Jatekos
+    WHERE id = NEW.jatekos1Id;
+
+    SELECT szint, parbajraHivhato INTO jatekos2_level, parbajraHivhato_jatekos2
+    FROM Jatekos
+    WHERE id = NEW.jatekos2Id;
+
+    -- Nézzük meg hogy mindkét játékos párbajrahívható -e
+    IF parbajraHivhato_jatekos1 = TRUE AND parbajraHivhato_jatekos2 = TRUE THEN
+        -- Nézzük meg hogy a szintjük különbsége nem nagyobb -e 5-nél
+        IF ABS(jatekos1_level - jatekos2_level) > 5 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'A Párbaj nem jöhet létre.';
+        END IF;
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Mindkét játékos alkalmas a Párbajra';
+    END IF;
+END;
+//
+DELIMITER ;
 
 
