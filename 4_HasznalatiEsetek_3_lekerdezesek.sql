@@ -52,7 +52,7 @@ DELETE FROM Jatekos WHERE felhasznaloId = (SELECT id FROM Felhasznalo WHERE nev 
 SELECT nev FROM Jatekos WHERE tapasztalatPont >= 1000;
 
 -- 18. Frissítsük a Csoport táblában az összes rekordot úgy, hogy a tagokSzama értéke legyen 5, ha a csoport neve 'IngyomBingyomCrew'.
-UPDATE Csoport SET tagokSzama = 5 WHERE nev = 'IngyomBingyomCrew';
+UPDATE Csoport SET tagokSzama = 4 WHERE nev = 'IngyomBingyomCrew';
 
 -- 19. Válasszuk ki az összes olyan szörnyet, amely legalább 100 tapasztalati pontot ad.
 SELECT nev FROM Szorny WHERE tapasztalatPontotAd >= 100;
