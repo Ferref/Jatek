@@ -8,9 +8,10 @@ DROP TRIGGER IF EXISTS kaszt_modositok;
 -- Csoport tagokSzama trigger eldobása ha már létezik
 DROP TIGGER IF EXISTS noveles_tagokSzama;
 
--- Parbaj ellenörző-trigger eldobása ha már létezik +++ ha azonos helyen vannak
+-- Parbaj ellenörző-trigger eldobása ha már létezik (javitani kell hogy azaonos helyen is legyenek)
 DROP TIGGER IF EXISTS ellenoriz_parbaj_kovetelmenyek;
 
+-- Kellenek meg
 -- Helyszin Trigger hogy be tud e lepni
 -- Parbaj tigger 2 amivel tp-t, aranyat kapunk
 -- Harc trigger (ha azonos helyen vannak)
