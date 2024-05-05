@@ -57,10 +57,10 @@ INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, he
 ('Varázsló kobold', 120, 700, 180, 40, 2);
 
 -- Példa adatok beillesztése a Csoport táblába
-INSERT INTO Csoport (nev, tagokSzama) VALUES
-('Kalandorok', 3),
-('Csavargók', 2),
-('IngyomBingyomCrew', 2);
+INSERT INTO Csoport (nev) VALUES
+('Kalandorok'),
+('Csavargók'),
+('IngyomBingyomCrew');
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES
@@ -100,10 +100,10 @@ INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, he
 ('Ragadozó növény', 90, 700, 180, 45, 1);
 
 -- Példa adatok beillesztése a Csoport táblába
-INSERT INTO Csoport (nev, tagokSzama) VALUES
-('Bátorságosok', 4),
-('Védelmezők', 3),
-('Ködös brigád', 3);
+INSERT INTO Csoport (nev) VALUES
+('Bátorságosok'),
+('Védelmezők'),
+('Ködös brigád');
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES

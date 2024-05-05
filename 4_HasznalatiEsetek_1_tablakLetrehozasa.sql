@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS Jatekos (
     eletero INT DEFAULT 100,
     sebzes INT DEFAULT 10,
     parbajraHivhato BOOLEAN DEFAULT FALSE,
-    csoportId INT,
+    csoportId INT DEFAULT NULL,
     arany INT DEFAULT 0,
     online BOOLEAN DEFAULT TRUE,
     helyszinId INT,
@@ -588,6 +588,9 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+
+
 
 
 

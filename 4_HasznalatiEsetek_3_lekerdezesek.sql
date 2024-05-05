@@ -115,3 +115,13 @@ SELECT nev
 FROM Felszereles
 WHERE id IN (SELECT DISTINCT felszerelesId FROM JatekosFelszereles)
 AND nev LIKE '%Varázs%';
+
+-- Online jatekosok csoport szerint
+CREATE PROCEDURE OnlineJatekosok()
+BEGIN
+    SELECT Csoport.nev AS Csoport, COUNT(Jatekos.id) AS OnlineJatekosok
+    FROM Csoport
+    LEFT JOIN Jatekos ON Csoport.id = Jatekos.csoportId
+    WHERE Jatekos.online = TRUE
+    GROUP BY Csoport.nev;
+END;
