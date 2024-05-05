@@ -6,9 +6,6 @@ SELECT nev, sebzesModosito FROM Kaszt;
 -- 2. Frissítsük a Jatekos tábla egy rekordját: MarciJatekos1 szintjét állítsuk 2-re.
 UPDATE Jatekos SET szint = 2 WHERE nev = 'MarciJatekos1';
 
--- 3. Ellenőrizzük, hogy hány tagja van a 'Védelmezők' nevű csapatnak.
-SELECT tagokSzama FROM Csoport WHERE nev = 'Védelmezők';
-
 -- 4. Töröljük az 'A kinemmondom bolt' nevű boltot a Bolt táblából.
 DELETE FROM Bolt WHERE nev = 'A kinemmondom bolt';
 
@@ -30,9 +27,6 @@ SELECT nev FROM Szorny WHERE sebzes > 200;
 -- 10. Frissítsük a JatekosFelszereles táblában az összes rekordot úgy, hogy a felveve értéke legyen TRUE.
 UPDATE JatekosFelszereles SET felveve = TRUE WHERE felveve = False;
 
--- 11. Válasszuk ki az összes olyan csapatot, amelynek több mint 3 tagja van.
-SELECT nev FROM Csoport WHERE tagokSzama > 3;
-
 -- 12. Frissítsük a Szorny táblában az összes rekordot úgy, hogy az eletero értéke legyen 2000, ha a sebzes értéke legalább 300.
 UPDATE Szorny SET eletero = 2000 WHERE sebzes >= 300;
 
@@ -50,9 +44,6 @@ DELETE FROM Jatekos WHERE felhasznaloId = (SELECT id FROM Felhasznalo WHERE nev 
 
 -- 17. Válasszuk ki az összes játékost, akik legalább 1000 tapasztalati ponttal rendelkeznek.
 SELECT nev FROM Jatekos WHERE tapasztalatPont >= 1000;
-
--- 18. Frissítsük a Csoport táblában az összes rekordot úgy, hogy a tagokSzama értéke legyen 5, ha a csoport neve 'IngyomBingyomCrew'.
-UPDATE Csoport SET tagokSzama = 4 WHERE nev = 'IngyomBingyomCrew';
 
 -- 19. Válasszuk ki az összes olyan szörnyet, amely legalább 100 tapasztalati pontot ad.
 SELECT nev FROM Szorny WHERE tapasztalatPontotAd >= 100;
@@ -98,25 +89,16 @@ DELETE FROM Csoport WHERE nev LIKE '%Botrány%';
 
 -- 33. Töröljük azokat a helyszíneket, amelyekhez egyetlen szörny sem tartozik, és azokhoz sem tartozik játékos.
 DELETE FROM Helyszin
-WHERE id NOT IN (SELECT DISTINCT helyszinId FROM Szorny)
-AND id NOT IN (SELECT DISTINCT helyszinId FROM Jatekos);
+WHERE id NOT IN (SELECT helyszinId FROM Szorny)
+AND id NOT IN (SELECT helyszinId FROM Jatekos);
 
--- 34. Válasszuk ki azokat a csoportokat, amelyeknek legalább 3 tagja online van, és a csoport nevében szerepel a 'Guild' szó.
+-- 34. Válasszuk ki azokat a csoportokat, amelynek legalább 3 tagja online van, és a csoport nevében szerepel a 'Kalandorok' szó.
 SELECT c.nev 
 FROM Csoport c
 JOIN Jatekos j ON c.id = j.csoportId
 WHERE c.nev LIKE '%Kalandorok%'
 GROUP BY c.id
 HAVING COUNT(j.id) >= 3 AND SUM(j.online) >= 3;
-
--- 35. Frissítsük a Csoport táblában azokat a csoportokat, amelyeknek van legalább egy online játékosa, úgy hogy a tagokSzama értéküket növeljük 1-gyel.
-UPDATE Csoport c
-SET c.tagokSzama = c.tagokSzama + 1
-WHERE EXISTS (
-    SELECT 1
-    FROM Jatekos j
-    WHERE j.csoportId = c.id AND j.online = TRUE
-);
 
 -- 36. Frissítsük a Szorny táblában azokat a szörnyeket, amelyeknek a tapasztalatPontotAd értéke legalább 100, úgy hogy a sebzésüket növeljük 20%-kal.
 UPDATE Szorny
