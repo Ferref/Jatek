@@ -200,6 +200,22 @@ CREATE TABLE IF NOT EXISTS Parbaj (
     FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
 );
 
+-- FelszerelesKatMegn tábla létrehozása
+CREATE TABLE IF NOT EXISTS FelszerelesKatMegn (
+    katId INT AUTO_INCREMENT PRIMARY KEY,
+    katNev VARCHAR(100) NOT NULL
+);
+
+-- SzornyFelszDobhat tábla létrehozása
+CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
+    szornyId INT,
+    felszId INT,
+    FOREIGN KEY (szornyId) REFERENCES Szorny(id) ON DELETE CASCADE,
+    FOREIGN KEY (felszId) REFERENCES Felszereles(id) ON DELETE CASCADE,
+    PRIMARY KEY (szornyId, felszId)
+);
+
+
 
 -- Trigger létrehozása a Kaszt táblához
 DELIMITER //
