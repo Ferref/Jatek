@@ -52,9 +52,9 @@ INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint) VALUES
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
 ('Goblin', 50, 500, 100, 20, 1),
 ('Sárkány', 200, 1500, 300, 100, 2),
-('Harcos trollok', 100, 800, 200, 50, 3),
+('Harcos troll', 100, 800, 200, 50, 3),
 ('Vad orkok', 80, 600, 150, 30, 1),
-('Varázsló koboldok', 120, 700, 180, 40, 2);
+('Varázsló kobold', 120, 700, 180, 40, 2);
 
 -- Példa adatok beillesztése a Csoport táblába
 INSERT INTO Csoport (nev, tagokSzama) VALUES
@@ -97,13 +97,13 @@ INSERT INTO Jatekos (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VA
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
 ('Farkas', 70, 600, 150, 40, 1),
 ('Szellemlovag', 250, 2000, 350, 150, 2),
-('Ragadozó növények', 90, 700, 180, 45, 1);
+('Ragadozó növény', 90, 700, 180, 45, 1);
 
 -- Példa adatok beillesztése a Csoport táblába
 INSERT INTO Csoport (nev, tagokSzama) VALUES
 ('Bátorságosok', 4),
 ('Védelmezők', 3),
-('Ködös brigád', 5);
+('Ködös brigád', 3);
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES
