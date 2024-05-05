@@ -8,7 +8,7 @@ DROP TRIGGER IF EXISTS kaszt_modositok;
 -- Csoport tagokSzama trigger eldobása ha már létezik
 DROP TIGGER IF EXISTS noveles_tagokSzama;
 
--- Parbaj ellenörző-trigger eldobása ha már létezik (javitani kell hogy azaonos helyen is legyenek)
+-- Parbaj ellenörző-trigger eldobása ha már létezik
 DROP TIGGER IF EXISTS ellenoriz_parbaj_kovetelmenyek;
 
 -- Kellenek meg
