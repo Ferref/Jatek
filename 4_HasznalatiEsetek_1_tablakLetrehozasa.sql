@@ -2,11 +2,11 @@
 CREATE DATABASE IF NOT EXISTS Jatek;
 USE Jatek;
 
+-- TRIGGER: Csoportagok száma nem lehet több mint 4
+DROP TRIGGER IF EXISTS check_csoport_tagok_szama;
+
 -- TRIGGER: Kaszt életerő, sebzés módosítója
 DROP TRIGGER IF EXISTS kaszt_modositok;
-
--- TRIGGER: Csoport tagokSzama növelése
-DROP TRIGGER IF EXISTS noveles_tagokSzama;
 
 -- TRIGGER: Parbaj létrejöhet -e
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek;
@@ -18,16 +18,16 @@ DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
 
 -- TRIGGER: Harc szörny ellen. Ha nyerünk tp, ararny, felszereles?
-DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_harc_szorny_legyozese
+DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_harc_szorny_legyozese;
 
 -- TRIGGER: Jatekos szintje nem lehet nagyobb mint 100
-DROP TRIGGER IF EXISTS check_jatekos_szint
+DROP TRIGGER IF EXISTS check_jatekos_szint;
 
 -- TRIGGER: Jatekos szintje legyen a jatekos tapasztalatPontja / 1000
-DROP TRIGGER IF EXISTS update_jatekos_szint
+DROP TRIGGER IF EXISTS update_jatekos_szint;
 
 -- TRIGGER: Jatekos felveszi a felszerelést és az alapján növeli a sebzését és életerejét
-DROP TRIGGER IF EXISTS felszereles_felvetele
+DROP TRIGGER IF EXISTS felszereles_felvetele;
 
 -- nincs meg kesz
     -- szorny felszereles dobasanak TRIGGERe
@@ -84,7 +84,6 @@ CREATE TABLE IF NOT EXISTS Szerver (
 CREATE TABLE IF NOT EXISTS Csoport (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL,
-    tagokSzama INT DEFAULT 0,
     CONSTRAINT check_tagokSzama CHECK (tagokSzama <= 4)
 );
 
@@ -250,33 +249,6 @@ DELIMITER ;
 
 -- TRIGGER létrehozása a Csoport táblához
 DELIMITER //
-
-CREATE TRIGGER noveles_tagokSzama
-AFTER INSERT ON Jatekos
-FOR EACH ROW
-BEGIN
-    DECLARE csapat_bonusz FLOAT;
-
-    -- Ha az új játékos hozzá van rendelve egy csapathoz
-    IF NEW.csoportId IS NOT NULL THEN
-        -- Növeljük a csapat taglétszámát
-        UPDATE Csoport
-        SET tagokSzama = tagokSzama + 1
-        WHERE id = NEW.csoportId;
-
-        -- Kérjük le a csapat új taglétszámát
-        SELECT tagokSzama INTO csapat_bonusz
-        FROM Csoport
-        WHERE id = NEW.csoportId;
-
-        -- Frissítsük minden olyan játékos csapatbónuszát, aki ugyanahhoz a csoporthoz tartozik
-        UPDATE Jatekos
-        SET csapatBonusz = 1.0 + (csapat_bonusz - 1) * 0.1
-        WHERE csoportId = NEW.csoportId;
-    END IF;
-END;
-//
-DELIMITER ;
 
 -- Párbaj követelmények tigger: szint, parbajraHivhato, helyszin 
 -- Párbaj követelmények és győzelem utáni tapasztalatpont trigger
@@ -523,6 +495,29 @@ BEGIN
     SET eletero = eletero + eletero_modosito,
         sebzes = sebzes + sebzes_modosito
     WHERE id = NEW.jatekosId;
+END;
+//
+DELIMITER ;
+
+-- TRIGGER létrehozása a Csoport táblához
+DELIMITER //
+
+CREATE TRIGGER check_csoport_tagok_szama
+BEFORE INSERT ON Csoport
+FOR EACH ROW
+BEGIN
+    DECLARE tagok_szama INT;
+
+    -- Kérjük le a csoport aktuális tagjainak számát
+    SELECT COUNT(*) INTO tagok_szama
+    FROM Jatekos
+    WHERE csoportId = NEW.id;
+
+    -- Ellenőrizzük, hogy a csoportba beszúrandó új játékos után a csoportban maradó játékosok száma ne lépje túl a 4-et
+    IF tagok_szama >= 4 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Egy csoportban nem lehet több mint 4 játékos.';
+    END IF;
 END;
 //
 DELIMITER ;
