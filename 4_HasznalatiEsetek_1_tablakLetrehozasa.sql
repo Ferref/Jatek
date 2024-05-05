@@ -20,8 +20,6 @@ DROP TIGGER IF EXISTS ellenoriz_parbaj_kovetelmenyek;
 -- felszereles trigger
 -- bolt elad, vasarol trigger
 
--- 
-DROP TRIGGER IF EXISTS check_parbaj_requirements
 
 -- Kaszt tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kaszt (
@@ -225,12 +223,16 @@ END;
 //
 DELIMITER ;
 
+-- Trigger létrehozása a Párbaj táblához
+-- Create trigger if not exists
+DROP TRIGGER IF EXISTS check_parbaj_requirements;
+
 -- Trigger létrehozása a Péárbaj táblához
 -- Create trigger if not exists
 DROP TRIGGER IF EXISTS check_parbaj_requirements;
 
+-- Párbaj követelmények tigger: szint, parbajraHivhato, helyszin 
 DELIMITER //
-
 CREATE TRIGGER ellenoriz_parbaj_kovetelmenyek
 BEFORE INSERT ON Parbaj
 FOR EACH ROW
@@ -239,20 +241,22 @@ BEGIN
     DECLARE jatekos2_level INT;
     DECLARE parbajraHivhato_jatekos1 BOOLEAN;
     DECLARE parbajraHivhato_jatekos2 BOOLEAN;
+    DECLARE helyszin1 INT;
+    DECLARE helyszin2 INT;
 
-    -- Kérjük le a két játékos szintjét
-    SELECT szint, parbajraHivhato INTO jatekos1_level, parbajraHivhato_jatekos1
+    -- Kérjük le a két játékos szintjét és helyszínét
+    SELECT szint, parbajraHivhato, helyszinId INTO jatekos1_level, parbajraHivhato_jatekos1, helyszin1
     FROM Jatekos
     WHERE id = NEW.jatekos1Id;
 
-    SELECT szint, parbajraHivhato INTO jatekos2_level, parbajraHivhato_jatekos2
+    SELECT szint, parbajraHivhato, helyszinId INTO jatekos2_level, parbajraHivhato_jatekos2, helyszin2
     FROM Jatekos
     WHERE id = NEW.jatekos2Id;
 
     -- Nézzük meg hogy mindkét játékos párbajrahívható -e
     IF parbajraHivhato_jatekos1 = TRUE AND parbajraHivhato_jatekos2 = TRUE THEN
-        -- Nézzük meg hogy a szintjük különbsége nem nagyobb -e 5-nél
-        IF ABS(jatekos1_level - jatekos2_level) > 5 THEN
+        -- Nézzük meg hogy a szintjük különbsége nem nagyobb -e 5-nél és hogy azonos helyszínről jönnek-e
+        IF ABS(jatekos1_level - jatekos2_level) > 5 OR helyszin1 != helyszin2 THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'A Párbaj nem jöhet létre.';
         END IF;
@@ -263,5 +267,6 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 
