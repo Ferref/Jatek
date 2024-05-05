@@ -8,16 +8,13 @@ DROP TRIGGER IF EXISTS check_csoport_tagok_szama;
 -- TRIGGER: Kaszt életerő, sebzés módosítója
 DROP TRIGGER IF EXISTS kaszt_modositok;
 
--- TRIGGER: Parbaj létrejöhet -e
-DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek;
-
 -- TRIGGER: Be tud a lépni a játékos a helyszínre
 DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 
--- TRIGGER: Párbaj követelmény, tapasztalatpont és arany növelése ha létrejön a párbaj
+-- TRIGGER: Párbaj
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
 
--- TRIGGER: Harc szörny ellen. Ha nyerünk tp, ararny, felszereles?
+-- TRIGGER: Harc szörny ellen
 DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_szorny_legyozese;
 
 -- TRIGGER: Jatekos szintje nem lehet nagyobb mint 100
@@ -26,10 +23,10 @@ DROP TRIGGER IF EXISTS check_jatekos_szint;
 -- TRIGGER: Jatekos szintje legyen a jatekos tapasztalatPontja / 1000
 DROP TRIGGER IF EXISTS update_jatekos_szint;
 
--- TRIGGER: Jatekos felveszi a felszerelést és az alapján növeli a sebzését és életerejét
+-- TRIGGER: Jatekos felveszi a felszerelést
 DROP TRIGGER IF EXISTS felszereles_felvesz;
 
--- TRIGGER: Jatekos leveszi a felszerelést és az alapján csökkenti a sebzését és életerejét
+-- TRIGGER: Jatekos leveszi a felszerelést
 DROP TRIGGER IF EXISTS felszereles_levesz;
 
 -- TRIGGER: Játekos kilép a csoportjából
@@ -41,10 +38,11 @@ DROP TRIGGER IF EXISTS csoportba_belep;
 -- TRIGGER: Játekos helyszint akar változtatni
 DROP TRIGGER IF EXISTS helyszin_valtoztatas;
 
+-- TRIGGER: Játekos felszerelést elad
+DROP TRIGGER IF EXISTS felszereles_elad;
 
--- nincs meg kesz
-    -- felszerelest elad TRIGGER
-    -- felszerelest vesz TRIGGER
+-- TRIGGER: Játekos felszerelést vásárol
+DROP TRIGGER IF EXISTS felszereles_vasarol;
 
 
 -- Kaszt tábla létrehozása
@@ -621,7 +619,7 @@ DELIMITER ;
 -- TRIGGER létrehozása a BoltFelszereles táblához
 DELIMITER //
 
-CREATE TRIGGER elad_felszereles
+CREATE TRIGGER felszereles_elad
 AFTER INSERT ON BoltFelszereles
 FOR EACH ROW
 BEGIN
@@ -635,6 +633,59 @@ BEGIN
         UPDATE Jatekos
         SET arany = arany + (SELECT ar FROM Felszereles WHERE id = NEW.felszerelesId)
         WHERE id = NEW.jatekosId;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- TRIGGER létrehozása a BoltFelszereles táblához
+DELIMITER //
+
+CREATE TRIGGER felszereles_vasarol
+AFTER INSERT ON BoltFelszereles
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy a játékosnak megfelelő-e a szintje a felszerelés vásárlásához
+    DECLARE jatekos_szint INT;
+    DECLARE felszereles_min_szint INT;
+    DECLARE felsz_id INT;
+
+    -- Kérjük le a játékos aktuális szintjét és a felszerelés minimális szintjét
+    SELECT NEW.jatekosId INTO jatekos_szint;
+    SELECT minimumSzint INTO felszereles_min_szint
+    FROM Felszereles
+    WHERE id = NEW.felszerelesId;
+
+    -- Ellenőrizzük, hogy a játékosnak van-e elegendő aranya a felszerelés vásárlásához
+    IF (SELECT arany FROM Jatekos WHERE id = NEW.jatekosId) >= (SELECT ar FROM Felszereles WHERE id = NEW.felszerelesId) THEN
+        -- Ellenőrizzük, hogy a játékosnak megfelelő-e a szintje a felszerelés vásárlásához
+        IF jatekos_szint >= felszereles_min_szint THEN
+            -- Beszúrjuk a vásárolt felszerelést a JatekosFelszereles táblába
+            INSERT INTO JatekosFelszereles (jatekosId, felszerelesId, felveve)
+            VALUES (NEW.jatekosId, NEW.felszerelesId, TRUE);
+
+            -- Kiválasztjuk a felszerelés árát
+            SELECT ar INTO felsz_id
+            FROM Felszereles
+            WHERE id = NEW.felszerelesId;
+
+            -- Csökkentjük a játékos aranyát a felszerelés árával
+            UPDATE Jatekos
+            SET arany = arany - felsz_id
+            WHERE id = NEW.jatekosId;
+
+            -- Töröljük a felszerelést a boltból
+            DELETE FROM BoltFelszereles
+            WHERE boltId = NEW.boltId AND felszerelesId = NEW.felszerelesId;
+        ELSE
+            -- Jelezzük a hibát, hogy a játékosnak nincs megfelelő szintje a felszerelés vásárlásához
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Nincs megfelelő szinted a felszerelés vásárlásához.';
+        END IF;
+    ELSE
+        -- Jelezzük a hibát, hogy a játékosnak nincs elegendő aranya a felszerelés vásárlásához
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Nincs elegendő aranyad a felszerelés vásárlásához.';
     END IF;
 END;
 //
