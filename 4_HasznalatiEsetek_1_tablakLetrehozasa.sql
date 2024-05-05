@@ -32,12 +32,15 @@ DROP TRIGGER IF EXISTS felszereles_felvesz;
 -- TRIGGER: Jatekos leveszi a felszerelést és az alapján csökkenti a sebzését és életerejét
 DROP TRIGGER IF EXISTS felszereles_levesz;
 
+-- TRIGGER: Játekos kilép a csoportjából
+DROP TRIGGER IF EXISTS csoportbol_kilep;
+
+-- TRIGGER: Játekos belép egy csoportba
+DROP TRIGGER IF EXISTS csoportba_belep;
+
 
 -- nincs meg kesz
     -- szorny felszereles dobasanak TRIGGERe
-
-    -- felszerelest levesz TRIGGER
-    -- felszerelest felvesz TRIGGER
 
     -- felszerelest elad TRIGGER
     -- felszerelest vesz TRIGGER
@@ -551,5 +554,42 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- TRIGGER létrehozása a Jatekos táblához
+DELIMITER //
+
+CREATE TRIGGER csoportbol_kilep
+AFTER DELETE ON Jatekos
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy a játékosnak van-e csoporttagsága
+    IF OLD.csoportId IS NOT NULL THEN
+        -- Frissítjük a csoport tagjainak számát
+        UPDATE Csoport
+        SET tagokSzama = tagokSzama - 1
+        WHERE id = OLD.csoportId;
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- TRIGGER létrehozása a Jatekos táblához
+DELIMITER //
+
+CREATE TRIGGER csoportba_belep
+AFTER INSERT ON Jatekos
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy az újonnan beszúrt játékosnak van-e csoportja
+    IF NEW.csoportId IS NOT NULL THEN
+        -- Frissítjük a csoport tagjainak számát
+        UPDATE Csoport
+        SET tagokSzama = tagokSzama + 1
+        WHERE id = NEW.csoportId;
+    END IF;
+END;
+//
+DELIMITER ;
+
 
 
