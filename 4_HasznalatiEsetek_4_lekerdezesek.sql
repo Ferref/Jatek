@@ -23,7 +23,7 @@ DELETE FROM Felszereles WHERE minimumSzint > 5;
 
 -- 9. Válasszuk ki az összes olyan szörnyet, amelynek sebzése több mint 200.
 SELECT nev FROM Szorny WHERE sebzes > 200;
-
+--
 -- 10. Frissítsük a JatekosFelszereles táblában az összes rekordot úgy, hogy a felveve értéke legyen TRUE.
 UPDATE JatekosFelszereles SET felveve = TRUE WHERE felveve = False;
 
