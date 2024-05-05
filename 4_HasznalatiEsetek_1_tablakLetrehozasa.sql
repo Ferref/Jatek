@@ -17,7 +17,7 @@ DROP TRIGGER IF EXISTS check_helyszin_minimum_szint;
 -- TRIGGER: Párbaj követelmény, tapasztalatpont és arany növelése ha létrejön a párbaj
 DROP TRIGGER IF EXISTS check_parbaj_kovetelmenyek_and_gyozelem_tapasztalatpont_noveles
 
--- TRIGGER: Harc utáni tapasztalatpont, arany
+-- TRIGGER: Harc szörny ellen. Ha nyerünk tp, ararny, felszereles?
 DROP TRIGGER IF EXISTS check_harc_kovetelmeny_and_harc_szorny_legyozese
 
 -- TRIGGER: Jatekos szintje nem lehet nagyobb mint 100
@@ -349,50 +349,96 @@ DELIMITER ;
 DELIMITER //
 
 
--- Harc TRIGGER (szörny legyőzésekor)
+-- TRIGGER a szörny ellen harchoz
 DELIMITER //
 
 CREATE TRIGGER check_harc_kovetelmeny_and_harc_szorny_legyozese
 AFTER INSERT ON Harcol
 FOR EACH ROW
 BEGIN
-    DECLARE tapasztalat_noveles INT;
-    DECLARE arany_noveles INT;
-    DECLARE jatekos_helyszin INT;
-    DECLARE szorny_helyszin INT;
-    
-    -- Kérjük le a játékos és a szörny helyszínét
-    SELECT helyszinId INTO jatekos_helyszin
+    DECLARE jatekos_potencial FLOAT;
+    DECLARE szorny_potencial FLOAT;
+    DECLARE jatekos_tamadas FLOAT;
+    DECLARE szorny_tamadas FLOAT;
+    DECLARE jatekos_kritikus_tamadas FLOAT;
+    DECLARE szorny_kritikus_tamadas FLOAT;
+    DECLARE gyoztesId INT;
+    DECLARE szorny_felsz_id INT;
+    DECLARE felszereles_id INT;
+    DECLARE tapasztalatPontAd INT;
+    DECLARE aranyAd INT;
+
+    -- Kérjük le a játékos harci potenciálját
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO jatekos_potencial
     FROM Jatekos
     WHERE id = NEW.jatekos1Id;
-    
-    SELECT helyszinId INTO szorny_helyszin
+
+    -- Kérjük le a szörny harci potenciálját
+    SELECT (szint * (eletero + sebzes) * (1 + RAND() * 0.4 - 0.2)) INTO szorny_potencial
     FROM Szorny
     WHERE id = NEW.szornyId;
-    
-    -- Ellenőrizzük, hogy a játékos és a szörny ugyanazon a helyen tartózkodik-e
-    IF jatekos_helyszin = szorny_helyszin THEN
-        -- Kérjük le a szörny adatait
-        DECLARE szorny_adatok CURSOR FOR
-        SELECT szint
+
+    -- Kiszámoljuk a támadásokat
+    SET jatekos_tamadas = jatekos_potencial * (1 + RAND() * 0.4 - 0.2);
+    SET szorny_tamadas = szorny_potencial * (1 + RAND() * 0.4 - 0.2);
+
+    -- Kiszámoljuk a kritikus támadásokat
+    SET jatekos_kritikus_tamadas = jatekos_tamadas * (1 + RAND() * 0.4 - 0.2);
+    SET szorny_kritikus_tamadas = szorny_tamadas * (1 + RAND() * 0.4 - 0.2);
+
+    -- Kiválasztjuk a győztest
+    IF jatekos_kritikus_tamadas > szorny_kritikus_tamadas THEN
+        SET gyoztesId = NEW.jatekos1Id;
+    ELSE
+        SET gyoztesId = NEW.szornyId;
+    END IF;
+
+    -- Frissítjük az újonnan beszúrt rekord győztesének azonosítóját
+    SET NEW.gyoztesId = gyoztesId;
+
+    -- Ha a győztes a játékos, akkor dobunk felszerelést a szörny által
+    IF gyoztesId = NEW.jatekos1Id THEN
+        -- Véletlenszerűen válasszunk egy felszerelést a SzornyFelszDobhat táblából
+        SELECT felszId INTO felszereles_id
+        FROM SzornyFelszDobhat
+        WHERE szornyId = NEW.szornyId
+        ORDER BY RAND()
+        LIMIT 1;
+
+        -- Ellenőrizzük, hogy valóban létezik-e felszerelés, amit dobhat a szörny
+        IF felszereles_id IS NOT NULL THEN
+            -- Ha igen, akkor adjuk hozzá a felszerelést a játékoshoz
+            INSERT INTO JatekosFelszereles (jatekosId, felszerelesId, felveve)
+            VALUES (NEW.jatekos1Id, felszereles_id, FALSE);
+        END IF;
+
+        -- Kérjük le a szörny által adott tapasztalatpontot
+        SELECT tapasztalatPontotAd INTO tapasztalatPontAd
         FROM Szorny
         WHERE id = NEW.szornyId;
-        
-        -- Számoljuk ki a tapasztalatpont és arany növelését
-        OPEN szorny_adatok;
-        FETCH szorny_adatok INTO tapasztalat_noveles;
-        SET arany_noveles = tapasztalat_noveles * 5;
-        CLOSE szorny_adatok;
-        
-        -- Frissítsük a játékos tapasztalatpontjait és aranyát
+
+        -- Frissítjük a játékos tapasztalatpontjait
         UPDATE Jatekos
-        SET tapasztalatPont = tapasztalatPont + (tapasztalat_noveles * 25),
-            arany = arany + arany_noveles
-        WHERE id = NEW.jatekos1Id;
+        SET tapasztalatPont = tapasztalatPont + tapasztalatPontAd
+        WHERE id = gyoztesId;
+
+        -- Kérjük le a szörny által adható aranyat
+        SELECT aranyatDobhat INTO aranyAd
+        FROM Szorny
+        WHERE id = NEW.szornyId;
+
+        -- Generáljunk egy véletlenszerű aranyösszeget 0 és a szörny által adható arany között
+        SET aranyAd = FLOOR(RAND() * (aranyAd + 1));
+
+        -- Frissítsük a játékos aranyát
+        UPDATE Jatekos
+        SET arany = arany + aranyAd
+        WHERE id = gyoztesId;
     END IF;
 END;
 //
 DELIMITER ;
+
 
 
 -- TRIGGER létrehozása a Jatekos táblához, Jatekos szintje ne legyen nagyobb mint 100
