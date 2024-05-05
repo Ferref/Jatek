@@ -27,9 +27,16 @@ DROP TRIGGER IF EXISTS check_jatekos_szint
 DROP TRIGGER IF EXISTS update_jatekos_szint
 
 -- nincs meg kesz
-    -- vasarlas trigger
-    -- felszereles trigger
-    -- bolt elad, vasarol trigger
+    -- szorny felszereles dobasanak triggere
+
+    -- felszerelest levesz trigger
+    -- felszerelest felvesz trigger
+
+    -- felszerelest elad trigger
+    -- felszerelest vesz trigger
+    
+    -- csoportbol kilep trigger
+    -- csoportba belep trigger
 
 
 -- Kaszt tábla létrehozása
