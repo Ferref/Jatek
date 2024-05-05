@@ -43,13 +43,8 @@ DROP TRIGGER IF EXISTS helyszin_valtoztatas;
 
 
 -- nincs meg kesz
-    -- szorny felszereles dobasanak TRIGGERe
-
     -- felszerelest elad TRIGGER
     -- felszerelest vesz TRIGGER
-
-    -- csoportbol kilep TRIGGER
-    -- csoportba belep TRIGGER
 
 
 -- Kaszt tábla létrehozása
@@ -622,6 +617,29 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- TRIGGER létrehozása a BoltFelszereles táblához
+DELIMITER //
+
+CREATE TRIGGER elad_felszereles
+AFTER INSERT ON BoltFelszereles
+FOR EACH ROW
+BEGIN
+    -- Ellenőrizzük, hogy a felszerelés eladható-e
+    IF (SELECT felszerelesFelveve FROM JatekosFelszereles WHERE jatekosId = NEW.jatekosId AND felszerelesId = NEW.felszerelesId) = FALSE THEN
+        -- Beszúrjuk az eladott felszerelést a BoltFelszereles táblába
+        INSERT INTO BoltFelszereles (boltId, felszerelesId)
+        VALUES (NEW.boltId, NEW.felszerelesId);
+        
+        -- A felszerelés árát a játékos kapja meg
+        UPDATE Jatekos
+        SET arany = arany + (SELECT ar FROM Felszereles WHERE id = NEW.felszerelesId)
+        WHERE id = NEW.jatekosId;
+    END IF;
+END;
+//
+DELIMITER ;
+
 
 
 
