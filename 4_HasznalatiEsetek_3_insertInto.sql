@@ -117,7 +117,7 @@ INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
 (1, 3);
 
 -- Példa adatok beillesztése a Harcol táblába
-INSERT INTO Harcol (Karakter1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
+INSERT INTO Harcol (karakter1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
 VALUES
 (1, 1, 1, 1),
 (2, 3, 2, 2),
@@ -126,7 +126,7 @@ VALUES
 (5, 5, 2, 5);
 
 -- Példa adatok beillesztése a Parbaj táblába
-INSERT INTO Parbaj (Karakter1Id, Karakter2Id, helyszinId, gyoztesId, parbajIdeje)
+INSERT INTO Parbaj (karakter1Id, karakter2Id, helyszinId, gyoztesId, parbajIdeje)
 VALUES
 (1, 2, 1, 1),
 (3, 4, 2, 3),

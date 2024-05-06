@@ -82,7 +82,7 @@ SELECT nev FROM Karakter WHERE parbajraHivhato = TRUE;
 UPDATE Szorny SET aranyatDobhat = 50 WHERE eletero <= 500;
 
 -- 31. Töröljük az összes olyan játékost, aki nem rendelkezik felszereléssel.
-DELETE FROM Karakter WHERE id NOT IN (SELECT KarakterId FROM KarakterFelszereles);
+DELETE FROM Karakter WHERE id NOT IN (SELECT karakterId FROM KarakterFelszereles);
 
 -- 32. Töröljük az összes olyan csapatot, amelynek nevében szerepel a 'Botrány'.
 DELETE FROM Csoport WHERE nev LIKE '%Botrány%';
