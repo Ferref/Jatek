@@ -26,13 +26,13 @@ INSERT INTO Helyszin (nev, minimumSzint) VALUES
 ('Mágikus torony', 3),
 ('Sötét barlang', 5);
 
--- Példa adatok beillesztése a Jatekos táblába
-INSERT INTO Jatekos (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
-('PetiJatekos1', 1, 1, 'F', 1, 1),
-('RobiJatekos1', 1, 2, 'N', 2, 1),
-('BelaJatekos1', 2, 3, 'F', 1, 2),
-('AnnaJatekos1', 2, 4, 'N', 3, 2),
-('LaciJatekos1', 3, 5, 'F', 2, 3);
+-- Példa adatok beillesztése a Karakter táblába
+INSERT INTO Karakter (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
+('PetiKarakter1', 1, 1, 'F', 1, 1),
+('RobiKarakter1', 1, 2, 'N', 2, 1),
+('BelaKarakter1', 2, 3, 'F', 1, 2),
+('AnnaKarakter1', 2, 4, 'N', 3, 2),
+('LaciKarakter1', 3, 5, 'F', 2, 3);
 
 -- Példa adatok beillesztése a Kepesseg táblába
 INSERT INTO Kepesseg (nev, sebzes, kasztId) VALUES
@@ -87,11 +87,11 @@ INSERT INTO Helyszin (nev, minimumSzint) VALUES
 ('Szellemes sír', 7),
 ('Tűzfaló barlang', 9);
 
--- Példa adatok beillesztése a Jatekos táblába
-INSERT INTO Jatekos (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
-('MarciJatekos1', 1, 1, 'F', 1, 2),
-('ViviJatekos1', 3, 2, 'N', 2, 1),
-('BenceJatekos1', 3, 5, 'F', 3, 3);
+-- Példa adatok beillesztése a Karakter táblába
+INSERT INTO Karakter (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
+('MarciKarakter1', 1, 1, 'F', 1, 2),
+('ViviKarakter1', 3, 2, 'N', 2, 1),
+('BenceKarakter1', 3, 5, 'F', 3, 3);
 
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
@@ -117,7 +117,7 @@ INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
 (1, 3);
 
 -- Példa adatok beillesztése a Harcol táblába
-INSERT INTO Harcol (jatekos1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
+INSERT INTO Harcol (Karakter1Id, szornyId, helyszinId, gyoztesId, harcIdeje)
 VALUES
 (1, 1, 1, 1),
 (2, 3, 2, 2),
@@ -126,7 +126,7 @@ VALUES
 (5, 5, 2, 5);
 
 -- Példa adatok beillesztése a Parbaj táblába
-INSERT INTO Parbaj (jatekos1Id, jatekos2Id, helyszinId, gyoztesId, parbajIdeje)
+INSERT INTO Parbaj (Karakter1Id, Karakter2Id, helyszinId, gyoztesId, parbajIdeje)
 VALUES
 (1, 2, 1, 1),
 (3, 4, 2, 3),
