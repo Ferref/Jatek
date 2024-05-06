@@ -95,7 +95,6 @@ DELIMITER ;
 -- TRIGGER létrehozása a Harcol táblához
 DELIMITER //
 
-/*
 CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
 BEFORE INSERT ON Harcol
 FOR EACH ROW
@@ -173,8 +172,6 @@ BEGIN
 END;
 //
 DELIMITER ;
-
-*/
 
 
 -- TRIGGER létrehozása a Karakter táblához
@@ -263,15 +260,15 @@ DELIMITER ;
 DELIMITER //
 
 CREATE TRIGGER check_csoport_tagok_szama
-BEFORE INSERT ON Karakter
+BEFORE INSERT ON Csoport
 FOR EACH ROW
 BEGIN
     DECLARE tagokSzama INT;
 
     -- Kérjük le a csoport aktuális tagjainak számát
     SELECT COUNT(*) INTO tagokSzama
-    FROM Karakter
-    WHERE csoportId = NEW.csoportId;
+    FROM Csoport_Tag
+    WHERE csoportId = NEW.id;
 
     -- Ellenőrizzük, hogy a csoportba beszúrandó új játékos után a csoportban maradó játékosok száma ne lépje túl a 4-et
     IF tagokSzama >= 4 THEN
