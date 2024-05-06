@@ -6,8 +6,8 @@ USE Jatek;
 CREATE TABLE IF NOT EXISTS Kaszt (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL UNIQUE,
-    eleteroModosito INT,
-    sebzesModosito INT
+    eleteroModosito INT NOT NULL,
+    sebzesModosito INT NOT NULL
 );
 
 -- Kepesseg tábla létrehozása
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS Kepesseg (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL UNIQUE,
     sebzes INT NOT NULL,
-    kasztId INT,
+    kasztId INT NOT NULL,
     minimumSzint INT DEFAULT 1,
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
 );
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS Bolt (
 
 -- FelhasznaloSzerver tábla létrehozása
 CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
-    szerverId INT,
-    felhasznaloId INT,
+    szerverId INT NOT NULL,
+    felhasznaloId INT NOT NULL,
     redDate DATETIME DEFAULT NOW(),
     FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
     FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
@@ -74,18 +74,18 @@ CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
 CREATE TABLE IF NOT EXISTS Jatekos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(50) NOT NULL UNIQUE,
-    szerverId INT,
-    felhasznaloId INT,
+    szerverId INT NOT NULL,
+    felhasznaloId INT NOT NULL,
     nem CHAR(1) NOT NULL,
-    kasztId INT,
+    kasztId INT NOT NULL,
     tapasztalatPont INT DEFAULT 0,
     szint INT DEFAULT 1 CHECK (szint <= 100),
     eletero INT DEFAULT 100,
-    sebzes INT DEFAULT 10,
+    sebzes INT DEFAULT 100,
     parbajraHivhato BOOLEAN DEFAULT FALSE,
     csoportId INT DEFAULT NULL,
     arany INT DEFAULT 0,
-    online BOOLEAN DEFAULT TRUE,
+    onlineVan BOOLEAN DEFAULT TRUE,
     helyszinId INT,
     csapatBonusz FLOAT DEFAULT 1.0,
     FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,

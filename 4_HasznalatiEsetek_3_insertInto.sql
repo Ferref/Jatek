@@ -2,11 +2,11 @@ USE Jatek;
 
 -- Példa adatok beillesztése a Felhasznalo táblába
 INSERT INTO Felhasznalo (nev, jelszo) VALUES
-('petiAFelhasznalo', 'jelszo1'),
-('robiAFelhasznalo', 'jelszo2'),
-('belaAFelhasznalo', 'jelszo3'),
-('annaAFelhasznalo', 'jelszo4'),
-('laciAFelhasznalo', 'jelszo5');
+('petimail@email.com', 'petiAFelhasznalo', 'jelszo1'),
+('robimail@email.com', 'robiAFelhasznalo', 'jelszo2'),
+('belamail@email.com', 'belaAFelhasznalo', 'jelszo3'),
+('annamail@email.com', 'annaAFelhasznalo', 'jelszo4'),
+('lacimail@email.com', 'laciAFelhasznalo', 'jelszo5');
 
 -- Példa adatok beillesztése a Szerver táblába
 INSERT INTO Szerver (nev) VALUES
