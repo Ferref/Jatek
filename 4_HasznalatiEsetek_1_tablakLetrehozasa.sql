@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS Bolt (
     nev VARCHAR(100) NOT NULL UNIQUE
 );
 
--- Jatekos tábla létrehozása
-CREATE TABLE IF NOT EXISTS Jatekos (
+-- Karakter tábla létrehozása
+CREATE TABLE IF NOT EXISTS Karakter (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(50) NOT NULL UNIQUE,
     szerverId INT NOT NULL,
@@ -100,14 +100,14 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
 );
 
--- JatekosFelszereles tábla létrehozása
-CREATE TABLE IF NOT EXISTS JatekosFelszereles (
-    jatekosId INT,
+-- KarakterFelszereles tábla létrehozása
+CREATE TABLE IF NOT EXISTS KarakterFelszereles (
+    karakterId INT,
     felszerelesId INT,
     felveve BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (jatekosId) REFERENCES Jatekos(id) ON DELETE CASCADE,
+    FOREIGN KEY (karakterId) REFERENCES Karakter(id) ON DELETE CASCADE,
     FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
-    PRIMARY KEY (jatekosId, felszerelesId)
+    PRIMARY KEY (karakterId, felszerelesId)
 );
 
 -- Szorny tábla létrehozása
@@ -144,29 +144,29 @@ CREATE TABLE IF NOT EXISTS BoltFelszereles (
 -- Harcol tábla létrehozása
 CREATE TABLE IF NOT EXISTS Harcol (
     harcId INT AUTO_INCREMENT PRIMARY KEY,
-    jatekos1Id INT,
+    karakter1Id INT,
     szornyId INT,
     helyszinId INT,
     gyoztesId INT,
     harcIdeje DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (jatekos1Id) REFERENCES Jatekos(id) ON DELETE CASCADE,
+    FOREIGN KEY (karakter1Id) REFERENCES Karakter(id) ON DELETE CASCADE,
     FOREIGN KEY (szornyId) REFERENCES Szorny(id) ON DELETE CASCADE,
     FOREIGN KEY (helyszinId) REFERENCES Helyszin(id) ON DELETE CASCADE,
-    FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
+    FOREIGN KEY (gyoztesId) REFERENCES Karakter(id) ON DELETE SET NULL
 );
 
 -- Parbaj tábla létrehozása
 CREATE TABLE IF NOT EXISTS Parbaj (
     parbajId INT AUTO_INCREMENT PRIMARY KEY,
-    jatekos1Id INT,
-    jatekos2Id INT,
+    karakter1Id INT,
+    karakter2Id INT,
     helyszinId INT,
     gyoztesId INT,
     parbajIdeje DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (jatekos1Id) REFERENCES Jatekos(id) ON DELETE CASCADE,
-    FOREIGN KEY (jatekos2Id) REFERENCES Jatekos(id) ON DELETE CASCADE,
+    FOREIGN KEY (karakter1Id) REFERENCES Karakter(id) ON DELETE CASCADE,
+    FOREIGN KEY (karakter2Id) REFERENCES Karakter(id) ON DELETE CASCADE,
     FOREIGN KEY (helyszinId) REFERENCES Helyszin(id) ON DELETE CASCADE,
-    FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
+    FOREIGN KEY (gyoztesId) REFERENCES Karakter(id) ON DELETE SET NULL
 );
 
 -- FelszerelesKatMegn tábla létrehozása
