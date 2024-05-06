@@ -1,4 +1,4 @@
--- Adatbázis létrehozása ha nem létezik
+-- Adatbázis létrehozása, ha még nem létezik
 CREATE DATABASE IF NOT EXISTS Jatek;
 USE Jatek;
 
@@ -42,10 +42,13 @@ CREATE TABLE IF NOT EXISTS Szerver (
 );
 
 -- FelhasznaloSzerver tábla létrehozása
-CREATE TABLE IF NOT EXISTS Szerver (
-    szerverID INT NOT NULL,
+CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
+    szerverId INT NOT NULL,
     felhasznaloId INT NOT NULL,
-    PRIMARY key (szerverId, felhasznaloId)
+    regDatum DATETIME DEFAULT NOW(),
+    FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
+    FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
+    PRIMARY KEY (szerverId, felhasznaloId)
 );
 
 -- Csoport tábla létrehozása
@@ -58,16 +61,6 @@ CREATE TABLE IF NOT EXISTS Csoport (
 CREATE TABLE IF NOT EXISTS Bolt (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL UNIQUE
-);
-
--- FelhasznaloSzerver tábla létrehozása
-CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
-    szerverId INT NOT NULL,
-    felhasznaloId INT NOT NULL,
-    redDate DATETIME DEFAULT NOW(),
-    FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
-    FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
-    PRIMARY KEY (szerverId, felhasznaloId)
 );
 
 -- Jatekos tábla létrehozása
@@ -103,7 +96,7 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     sebzes INT NOT NULL,
     eletero INT NOT NULL,
     minimumSzint INT DEFAULT 1,
-    kategoriaId INT NOT NULL CHECK (kategoriaId BETWEEN 1 AND 9),
+    kategoria INT NOT NULL CHECK (kategoria BETWEEN 1 AND 9),
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
 );
 
@@ -162,7 +155,7 @@ CREATE TABLE IF NOT EXISTS Harcol (
     FOREIGN KEY (gyoztesId) REFERENCES Jatekos(id) ON DELETE SET NULL
 );
 
--- Párbaj tábla létrehozása
+-- Parbaj tábla létrehozása
 CREATE TABLE IF NOT EXISTS Parbaj (
     parbajId INT AUTO_INCREMENT PRIMARY KEY,
     jatekos1Id INT,
@@ -184,19 +177,9 @@ CREATE TABLE IF NOT EXISTS FelszerelesKatMegn (
 
 -- SzornyFelszDobhat tábla létrehozása
 CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
-    szornyId INT,
-    felszId INT,
+    szornyId INT NOT NULL,
+    felszId INT NOT NULL,
     FOREIGN KEY (szornyId) REFERENCES Szorny(id) ON DELETE CASCADE,
     FOREIGN KEY (felszId) REFERENCES Felszereles(id) ON DELETE CASCADE,
     PRIMARY KEY (szornyId, felszId)
 );
-
-
-
-
-
-
-
-
-
-
