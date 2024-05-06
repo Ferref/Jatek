@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS Helyszin (
 -- Felhasznalo tábla létrehozása
 CREATE TABLE IF NOT EXISTS Felhasznalo (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(25) NOT NULL UNIQUE,
     nev VARCHAR(100) NOT NULL,
     jelszo VARCHAR(100) NOT NULL
 );
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS Szerver (
 -- Csoport tábla létrehozása
 CREATE TABLE IF NOT EXISTS Csoport (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL
+    nev VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- Bolt tábla létrehozása
