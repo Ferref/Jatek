@@ -53,7 +53,7 @@ INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, he
 ('Goblin', 50, 500, 100, 20, 1),
 ('Sárkány', 200, 1500, 300, 100, 2),
 ('Harcos troll', 100, 800, 200, 50, 3),
-('Vad orkok', 80, 600, 150, 30, 1),
+('Vad ork', 80, 600, 150, 30, 1),
 ('Varázsló kobold', 120, 700, 180, 40, 2);
 
 -- Példa adatok beillesztése a Csoport táblába
@@ -84,7 +84,7 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId) VALUES
 
 -- Példa adatok beillesztése a Helyszin táblába
 INSERT INTO Helyszin (nev, minimumSzint) VALUES
-('Szellemes sír', 7),
+('Aranyhomok', 7),
 ('Tűzfaló barlang', 9);
 
 -- Példa adatok beillesztése a Karakter táblába
