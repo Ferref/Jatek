@@ -1,6 +1,6 @@
 USE Jatek;
 
--- TRIGGER: Karakterek száma nem lehet több mint 4 egy szerveren
+-- TRIGGER: Karakterek száma nem lehet több mint 4 egy szerveren / felhasználó
 DROP TRIGGER IF EXISTS ellenoriz_szerver_karakterek;
 
 -- TRIGGER: Csoportagok száma nem lehet több mint 4
