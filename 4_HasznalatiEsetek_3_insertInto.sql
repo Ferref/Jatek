@@ -43,10 +43,10 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId) VALUES
 
 -- Példa adatok beillesztése a Felszereles táblába
 INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint) VALUES
-('Védelem pajzs', 1, 50, 200, 1, 1),
-('Varázskönyv', 2, 30, 80, 1, 1),
-('Íj', 2, 40, 90, 1, 2),
-('Lopakodó köpeny', 3, 20, 70, 1, 3);
+('Védelem pajzs', 1, 50, 200, 1),
+('Varázskönyv', 2, 30, 80, 1),
+('Íj', 2, 40, 90, 1),
+('Lopakodó köpeny', 3, 20, 70, 1);
 
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
