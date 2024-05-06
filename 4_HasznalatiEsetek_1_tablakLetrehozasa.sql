@@ -5,7 +5,7 @@ USE Jatek;
 -- Kaszt tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kaszt (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
+    nev VARCHAR(100) NOT NULL UNIQUE,
     eleteroModosito INT,
     sebzesModosito INT
 );
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Kaszt (
 -- Kepesseg tábla létrehozása
 CREATE TABLE IF NOT EXISTS Kepesseg (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
+    nev VARCHAR(100) NOT NULL UNIQUE,
     sebzes INT NOT NULL,
     kasztId INT,
     minimumSzint INT DEFAULT 1,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Kepesseg (
 -- Helyszin tábla létrehozása
 CREATE TABLE IF NOT EXISTS Helyszin (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
+    nev VARCHAR(100) NOT NULL UNIQUE,
     minimumSzint INT DEFAULT 1
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS Csoport (
 -- Bolt tábla létrehozása
 CREATE TABLE IF NOT EXISTS Bolt (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL
+    nev VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- FelhasznaloSzerver tábla létrehozása
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS Jatekos (
 -- Felszereles tábla létrehozása
 CREATE TABLE IF NOT EXISTS Felszereles (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
+    nev VARCHAR(100) NOT NULL UNIQUE,
     kasztId INT,
     sebzes INT NOT NULL,
     eletero INT NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS JatekosFelszereles (
 -- Szorny tábla létrehozása
 CREATE TABLE IF NOT EXISTS Szorny (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL,
+    nev VARCHAR(100) NOT NULL UNIQUE,
     tapasztalatPontotAd INT NOT NULL,
     szint INT DEFAULT 1,
     eletero INT NOT NULL,
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS Parbaj (
 -- FelszerelesKatMegn tábla létrehozása
 CREATE TABLE IF NOT EXISTS FelszerelesKatMegn (
     katId INT AUTO_INCREMENT PRIMARY KEY,
-    katNev VARCHAR(100) NOT NULL
+    katNev VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- SzornyFelszDobhat tábla létrehozása
