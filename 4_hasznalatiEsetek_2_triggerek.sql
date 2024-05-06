@@ -1,5 +1,8 @@
 USE Jatek;
 
+-- TRIGGER: Karakterek száma nem lehet több mint 4 egy szerveren
+DROP TRIGGER IF EXISTS ellenoriz_szerver_karakterek;
+
 -- TRIGGER: Csoportagok száma nem lehet több mint 4
 DROP TRIGGER IF EXISTS check_csoport_tagok_szama;
 
@@ -41,6 +44,32 @@ DROP TRIGGER IF EXISTS felszereles_elad;
 
 -- TRIGGER: Játekos felszerelést vásárol
 DROP TRIGGER IF EXISTS felszereles_vasarol;
+
+
+
+
+
+
+-- Triger létrehozása a FelhasznaloSzerver táblához
+DELIMITER //
+CREATE TRIGGER ellenoriz_szerver_karakterek
+BEFORE INSERT ON FelhasznaloSzerver
+FOR EACH ROW
+BEGIN
+    DECLARE karakterek_szama INT;
+    -- Megszámoljuk, hogy a felhasználó hány karakterrel rendelkezik már ezen a szerveren
+    SELECT COUNT(*)
+    INTO karakterek_szama
+    FROM FelhasznaloSzerver
+    WHERE szerverId = NEW.szerverId AND felhasznaloId = NEW.felhasznaloId;
+    
+    -- Ha a karakterek száma meghaladja a 4-et, akkor hibaüzenetet dobunk
+    IF karakterek_szama >= 4 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Egy felhasználó maximum 4 karakterrel lehet jelen egy szerveren!';
+    END IF;
+END//
+DELIMITER ;
+
 
 -- TRIGGER létrehozása a Kaszt táblához
 DELIMITER //
