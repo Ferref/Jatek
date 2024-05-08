@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Karakter (
     csoportId INT DEFAULT NULL,
     arany INT DEFAULT 0,
     onlineVan BOOLEAN DEFAULT TRUE,
-    helyszinId INT,
+    helyszinId INT DEFAULT 1,
     csapatBonusz FLOAT DEFAULT 1.0,
     FOREIGN KEY (szerverId) REFERENCES Szerver(id) ON DELETE CASCADE,
     FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,

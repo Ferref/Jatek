@@ -30,16 +30,16 @@ INSERT INTO Helyszin (nev, minimumSzint) VALUES
 INSERT INTO Karakter (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
 ('PetiKarakter1', 1, 1, 'F', 1, 1),
 ('RobiKarakter1', 1, 2, 'N', 2, 1),
-('BelaKarakter1', 2, 3, 'F', 1, 2),
-('AnnaKarakter1', 2, 4, 'N', 3, 2),
-('LaciKarakter1', 3, 5, 'F', 2, 3);
+('BelaKarakter1', 2, 3, 'F', 1, 1),
+('AnnaKarakter1', 2, 4, 'N', 3, 1),
+('LaciKarakter1', 3, 5, 'F', 2, 1);
 
 -- Példa adatok beillesztése a Kepesseg táblába
-INSERT INTO Kepesseg (nev, sebzes, kasztId) VALUES
-('Tűzgömb', 150, 2),
-('Kardcsapás', 120, 1),
-('Nyílvessző', 100, 3),
-('Varázslat', 180, 3);
+INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
+('Tűzgömb', 150, 3, 1),
+('Kardcsapás', 120, 1, 1),
+('Nyílvessző', 100, 2, 1),
+('Varázslat', 180, 3, 1);
 
 -- Példa adatok beillesztése a Felszereles táblába
 INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint) VALUES
