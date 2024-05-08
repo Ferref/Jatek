@@ -40,10 +40,10 @@ DROP TRIGGER IF EXISTS csoportba_belep;
 DROP TRIGGER IF EXISTS helyszin_valtoztatas;
 
 -- TRIGGER: Játekos felszerelést elad
-DROP TRIGGER IF EXISTS felszereles_elad;
+DROP TRIGGER IF EXISTS elad_felszerelest;
 
 -- TRIGGER: Játekos felszerelést vásárol
-DROP TRIGGER IF EXISTS felszereles_vasarol;
+DROP TRIGGER IF EXISTS vasarol_felszerelest;
 
 
 -- Triger létrehozása a FelhasznaloSzerver táblához
@@ -333,12 +333,9 @@ BEGIN
     DECLARE felszereles_ar INT;
     
     -- Kivesszük a felszerelés árát
-    SELECT eletero, sebzes INTO @felszereles_eletero, @felszereles_sebzes
+    SELECT arany INTO @felszereles_ar
     FROM Felszereles
     WHERE id = NEW.felszerelesId;
-    
-    -- Számítjuk a felszerelés árát
-    SET felszereles_ar = @felszereles_eletero * 10 + @felszereles_sebzes * 10; -- Példának céljából, tetszőleges árszámítás
     
     -- Levonjuk a játékos aranyából a felszerelés árát
     UPDATE Karakter
@@ -347,6 +344,7 @@ BEGIN
 END//
 
 DELIMITER ;
+
 
 
 
