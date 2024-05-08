@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     minimumSzint INT DEFAULT 1,
     kategoria INT NOT NULL CHECK (kategoria BETWEEN 1 AND 9),
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
+    FOREIGN KEY (katId) REFERENCES FelszerelesKatMegn(id) ON DELETE CASCADE
 );
 
 -- KarakterFelszereles tábla létrehozása

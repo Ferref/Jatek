@@ -1,7 +1,7 @@
 USE Jatek;
 
 -- Példa adatok beillesztése a Felhasznalo táblába
-INSERT INTO Felhasznalo (nev, jelszo) VALUES
+INSERT INTO Felhasznalo (email, nev, jelszo) VALUES
 ('petimail@email.com', 'petiAFelhasznalo', 'jelszo1'),
 ('robimail@email.com', 'robiAFelhasznalo', 'jelszo2'),
 ('belamail@email.com', 'belaAFelhasznalo', 'jelszo3'),
