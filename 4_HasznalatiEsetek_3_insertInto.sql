@@ -61,13 +61,6 @@ INSERT INTO FelszKatMegn (katNev) VALUES
 ('Kiegészítők'),
 ('Köpeny');
 
--- Példa adatok beillesztése a Felszereles táblába
-INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint, kategoria) VALUES
-('Védelem pajzs', 40, 50, 200, 5, 2),
-('Varázskönyv', 30, 30, 80, 1, 2),
-('Íj', 2, 40, 90, 3, 1),
-('Lopakodó köpeny', 3, 40, 70, 4, 9);
-
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
 ('Goblin', 50, 500, 100, 20, 1),
@@ -91,32 +84,18 @@ INSERT INTO Bolt (nev) VALUES
 ('A mocsárosi bolt'),
 ('A kinemmondom bolt');
 
--- Példa adatok beillesztése a BoltFelszereles táblába
-INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(1, 4),
-(2, 1);
 
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
 ('Farkas', 70, 600, 150, 40, 1),
 ('Szellemlovag', 250, 2000, 350, 150, 2),
 ('Ragadozó növény', 90, 700, 180, 45, 1),
-('Hatalmas Rák', 90, 800, 140, 45, 3),
-('Hatalmas Rák', 90, 500, 180, 45, 1);
+('Hatalmas Rák', 90, 800, 140, 45, 3);
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES
 ('A hősebbik bolt'),
 ('Aranyhomok boltja');
-
--- Példa adatok beillesztése a BoltFelszereles táblába
-INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
-(1, 2),
-(2, 4),
-(1, 3);
 
 -- Példa adatok beillesztése a Harcol táblába
 INSERT INTO Harcol (karakter1Id, szornyId, helyszinId, gyoztesId)
@@ -135,3 +114,18 @@ VALUES
 (2, 5, 3, 5),
 (4, 1, 1, 4),
 (5, 3, 2, 5);
+
+-- Példa adatok beillesztése a Felszereles táblába
+INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint, kategoria) VALUES
+('Védelem pajzs', 1, 50, 200, 5, 2),
+('Varázskönyv', 3, 30, 80, 1, 2),
+('Íj', 2, 40, 90, 3, 1),
+('Lopakodó köpeny', 3, 20, 70, 4, 9);
+
+-- Példa adatok beillesztése a BoltFelszereles táblába
+INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(1, 4),
+(2, 1);

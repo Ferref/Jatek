@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS FelszKatMegn (
 
 -- Felszereles tábla létrehozása
 CREATE TABLE IF NOT EXISTS Felszereles (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nev VARCHAR(100) NOT NULL UNIQUE,
     kasztId INT,
     sebzes INT NOT NULL,
