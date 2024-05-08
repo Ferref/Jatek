@@ -6,17 +6,17 @@ INSERT INTO Felhasznalo (email, nev, jelszo) VALUES
 ('annamail@email.com', 'annaAFelhasznalo', 'jelszo4'),
 ('lacimail@email.com', 'laciAFelhasznalo', 'jelszo5');
 
--- Példa adatok beillesztése a Szerver táblába
-INSERT INTO Szerver (nev) VALUES
-('Valuri'),
-('Behemot'),
-('Elvendur');
-
 -- Példa adatok beillesztése a Kaszt táblába
 INSERT INTO Kaszt (nev, eleteroModosito, sebzesModosito) VALUES
 ('Harcos', 150, 50),
 ('Ijjász', 100, 100),
 ('Mágus', 50, 150);
+
+-- Példa adatok beillesztése a Szerver táblába
+INSERT INTO Szerver (nev) VALUES
+('Valuri'),
+('Behemot'),
+('Elvendur');
 
 -- Példa adatok beillesztése a Helyszin táblába
 INSERT INTO Helyszin (nev, minimumSzint) VALUES
@@ -31,9 +31,12 @@ INSERT INTO Helyszin (nev, minimumSzint) VALUES
 INSERT INTO Karakter (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
 ('PetiKarakter1', 1, 1, 'F', 1, 1),
 ('RobiKarakter1', 1, 2, 'F', 2, 1),
-('BelaKarakter1', 2, 3, 'F', 1, 1),
+('BelaKarakter1', 2, 3, 'F', 1, 2),
 ('AnnaKarakter1', 2, 4, 'N', 3, 1),
-('LaciKarakter1', 3, 5, 'F', 2, 1);
+('LaciKarakter1', 3, 5, 'F', 2, 1),
+('PetiKarakter2', 1, 1, 'F', 1, 1),
+('RobiKarakter2', 3, 2, 'F', 2, 1),
+('BelaKarakter2', 3, 3, 'F', 3, 1);
 
 -- Példa adatok beillesztése a Kepesseg táblába
 INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
@@ -43,7 +46,7 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
 ('Varázslat', 180, 3, 1),
 ('Tűzlövés', 140, 3, 1),
 ('Védelmi varázslat', 0, 3, 1),
-('Tolvajlás', 0, 20, 1),
+('Tolvajlás', 0, 2, 1),
 ('Pörölycsapás', 0, 200, 1);
 
 
@@ -66,7 +69,10 @@ INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, he
 INSERT INTO Csoport (nev) VALUES
 ('Kalandorok'),
 ('Csavargók'),
-('IngyomBingyomCrew');
+('IngyomBingyomCrew'),
+('Bátorságosok'),
+('Védelmezők'),
+('Ködös brigád');
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES
@@ -82,19 +88,6 @@ INSERT INTO BoltFelszereles (boltId, felszerelesId) VALUES
 (1, 4),
 (2, 1);
 
--- Példa adatok beillesztése a Helyszin táblába
-INSERT INTO Helyszin (nev, minimumSzint) VALUES
-('Kezdők tanyája', 1),
-('Aranyhomok', 7),
-('Tűzfaló barlang', 9),
-('Vad erdő', 11);
-
--- Példa adatok beillesztése a Karakter táblába
-INSERT INTO Karakter (nev, szerverId, felhasznaloId, nem, kasztId, helyszinId) VALUES
-('PetiKarakter2', 1, 1, 'F', 1, 1),
-('RobiKarakter2', 3, 2, 'F', 2, 1),
-('BelaKarakter2', 3, 3, 'F', 3, 1);
-
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
 ('Farkas', 70, 600, 150, 40, 1),
@@ -102,12 +95,6 @@ INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, he
 ('Ragadozó növény', 90, 700, 180, 45, 1),
 ('Hatalmas Rák', 90, 800, 140, 45, 3),
 ('Hatalmas Rák', 90, 500, 180, 45, 1);
-
--- Példa adatok beillesztése a Csoport táblába
-INSERT INTO Csoport (nev) VALUES
-('Bátorságosok'),
-('Védelmezők'),
-('Ködös brigád');
 
 -- Példa adatok beillesztése a Bolt táblába
 INSERT INTO Bolt (nev) VALUES
