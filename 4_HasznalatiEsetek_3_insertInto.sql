@@ -49,6 +49,17 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
 ('Tolvajlás', 0, 2, 1),
 ('Pörölycsapás', 200, 1, 1);
 
+-- Példa adatok beillesztése a FelszKatMegn táblába
+INSERT INTO FelszKatMegn (katNev) VALUES
+('Fegyver'),
+('Védelem'),
+('Vállvért'),
+('Ruha'),
+('Sisak'),
+('Pajzs'),
+('Medál'),
+('Kiegészítők'),
+('Köpeny');
 
 -- Példa adatok beillesztése a Felszereles táblába
 INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint) VALUES
