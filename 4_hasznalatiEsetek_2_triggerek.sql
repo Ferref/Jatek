@@ -324,6 +324,29 @@ END//
 
 DELIMITER ;
 
+DELIMITER //
+
+CREATE TRIGGER vasarol_felszerelest
+AFTER INSERT ON KarakterFelszereles
+FOR EACH ROW
+BEGIN
+    DECLARE felszereles_ar INT;
+    
+    -- Kivesszük a felszerelés árát
+    SELECT eletero, sebzes INTO @felszereles_eletero, @felszereles_sebzes
+    FROM Felszereles
+    WHERE id = NEW.felszerelesId;
+    
+    -- Számítjuk a felszerelés árát
+    SET felszereles_ar = @felszereles_eletero * 10 + @felszereles_sebzes * 10; -- Példának céljából, tetszőleges árszámítás
+    
+    -- Levonjuk a játékos aranyából a felszerelés árát
+    UPDATE Karakter
+    SET arany = arany - felszereles_ar
+    WHERE id = NEW.karakterId;
+END//
+
+DELIMITER ;
 
 
 
