@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS BoltFelszereles (
     PRIMARY KEY (boltId, felszerelesId)
 );
 
---  tábla létrehozása
+--  SzornyFelszDobhat tábla létrehozása
 CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
     szornyId INT NOT NULL,
     felszId INT NOT NULL,
