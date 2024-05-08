@@ -244,6 +244,7 @@ END;
 //
 DELIMITER ;
 
+-- TRIGGER létrehozása a Szörnyekkel való harchoz (Harcol tábla)
 DELIMITER //
 
 CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
@@ -294,8 +295,34 @@ END//
 
 DELIMITER ;
 
+DELIMITER //
+-- TRIGGER létrehozása csoportból való kilépéshez
+CREATE TRIGGER csoportbol_kilep
+AFTER DELETE ON Csoport
+FOR EACH ROW
+BEGIN
+    UPDATE Karakter
+    SET csoportId = NULL
+    WHERE csoportId = OLD.id;
+END//
 
+DELIMITER ;
 
+-- TRIGGER létrehozása csoportba való belépéshez, ha a játékos még nem tagja egy csoportnak sem
+DELIMITER //
+
+CREATE TRIGGER csoportba_belep
+AFTER INSERT ON Karakter
+FOR EACH ROW
+BEGIN
+    IF NEW.csoportId IS NOT NULL THEN
+        UPDATE Karakter
+        SET csoportId = NEW.csoportId
+        WHERE id = NEW.id;
+    END IF;
+END//
+
+DELIMITER ;
 
 
 
