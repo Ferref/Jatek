@@ -326,6 +326,7 @@ DELIMITER ;
 
 DELIMITER //
 
+-- TRIGGER létrehozása a felszerelés vásárlásához
 CREATE TRIGGER vasarol_felszerelest
 AFTER INSERT ON KarakterFelszereles
 FOR EACH ROW
@@ -345,6 +346,27 @@ END//
 
 DELIMITER ;
 
+-- TRIGGER létrehozása a felszerelés eladásához
+DELIMITER //
+
+CREATE TRIGGER elad_felszerelest
+AFTER INSERT ON BoltFelszereles
+FOR EACH ROW
+BEGIN
+    DECLARE felszereles_ar INT;
+    
+    -- Kivesszük a felszerelés árát
+    SELECT arany INTO felszereles_ar
+    FROM Felszereles
+    WHERE id = NEW.felszerelesId;
+    
+    -- Hozzáadjuk a játékos aranyához a felszerelés árát
+    UPDATE Karakter
+    SET arany = arany + felszereles_ar
+    WHERE id = NEW.boltId;
+END//
+
+DELIMITER ;
 
 
 
