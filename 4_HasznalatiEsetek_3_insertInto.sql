@@ -49,7 +49,7 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
 ('Tolvajlás', 0, 2, 1),
 ('Pörölycsapás', 200, 1, 1);
 
--- Példa adatok beillesztése a FelszKatMegn táblába
+-- Példa adatok beillesztése a FelszerelesKatMegn táblába
 INSERT INTO FelszKatMegn (katNev) VALUES
 ('Fegyver'),
 ('Védelem'),
@@ -62,11 +62,11 @@ INSERT INTO FelszKatMegn (katNev) VALUES
 ('Köpeny');
 
 -- Példa adatok beillesztése a Felszereles táblába
-INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint) VALUES
-('Védelem pajzs', 1, 50, 200, 1),
-('Varázskönyv', 3, 30, 80, 1),
-('Íj', 2, 40, 90, 1),
-('Lopakodó köpeny', 3, 20, 70, 1);
+INSERT INTO Felszereles (nev, kasztId, sebzes, eletero, minimumSzint, kategoria) VALUES
+('Védelem pajzs', 40, 50, 200, 5, 2),
+('Varázskönyv', 30, 30, 80, 1, 2),
+('Íj', 2, 40, 90, 3, 1),
+('Lopakodó köpeny', 3, 40, 70, 4, 9);
 
 -- Példa adatok beillesztése a Szorny táblába
 INSERT INTO Szorny (nev, tapasztalatPontotAd, eletero, sebzes, aranyatDobhat, helyszinId) VALUES
