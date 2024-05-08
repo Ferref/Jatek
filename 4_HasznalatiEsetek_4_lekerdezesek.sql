@@ -6,8 +6,11 @@ SELECT nev, sebzesModosito FROM Kaszt;
 -- 2. Frissítsük a Karakter tábla egy rekordját: MarciKarakter1 szintjét állítsuk 2-re.
 UPDATE Karakter SET szint = 2 WHERE nev = 'MarciKarakter1';
 
--- 4. Töröljük az 'A kinemmondom bolt' nevű boltot a Bolt táblából.
+-- 3. Töröljük az 'A kinemmondom bolt' nevű boltot a Bolt táblából.
 DELETE FROM Bolt WHERE nev = 'A kinemmondom bolt';
+
+-- 4. Töröljük az összes olyan csoportot, amelynek nincs legalább két tagja.
+DELETE FROM Csoport WHERE id NOT IN (SELECT csoportId FROM Karakter GROUP BY csoportId HAVING COUNT(*) >= 2);
 
 -- 5. Válasszuk ki az összes helyszínt, ahol a minimum szint 5 vagy annál kevesebb.
 SELECT nev FROM Helyszin WHERE minimumSzint <= 5;
@@ -21,11 +24,22 @@ SELECT nev FROM Karakter WHERE onlineVan = TRUE;
 -- 8. Töröljük az összes olyan felszerelést, amelynek minimumSzint értéke nagyobb, mint 5.
 DELETE FROM Felszereles WHERE minimumSzint > 5;
 
--- 9. Válasszuk ki az összes olyan szörnyet, amelynek sebzése több mint 200.
-SELECT nev FROM Szorny WHERE sebzes > 200;
---
+-- 9. Válasszuk ki azokat a helyszíneket, ahol legalább egy olyan szörny van, amelynek a tapasztalati pontot adása meghaladja az átlagos tapasztalati pontot adást.
+SELECT h.nev
+FROM Helyszin h
+JOIN Szorny s ON h.id = s.helyszinId
+GROUP BY h.nev
+HAVING MAX(s.tapasztalatPontotAd) > (SELECT AVG(tapasztalatPontotAd) FROM Szorny);
+
 -- 10. Frissítsük a KarakterFelszereles táblában az összes rekordot úgy, hogy a felveve értéke legyen TRUE.
-UPDATE KarakterFelszereles SET felveve = TRUE WHERE felveve = False;
+UPDATE KarakterFelszereles SET felveve = TRUE WHERE felveve = FALSE;
+
+-- 11. Válasszuk ki azokat a helyszíneket, ahol az átlagos szörnyek szintje meghaladja a 10-et.
+SELECT h.nev
+FROM Helyszin h
+JOIN Szorny s ON h.id = s.helyszinId
+GROUP BY h.nev
+HAVING AVG(s.szint) > 10;
 
 -- 12. Frissítsük a Szorny táblában az összes rekordot úgy, hogy az eletero értéke legyen 2000, ha a sebzes értéke legalább 300.
 UPDATE Szorny SET eletero = 2000 WHERE sebzes >= 300;
@@ -39,11 +53,21 @@ UPDATE Szorny SET aranyatDobhat = 0 WHERE eletero < 1000;
 -- 15. Válasszuk ki az összes olyan helyszínt, amelyhez legalább 3 szörny tartozik.
 SELECT nev FROM Helyszin WHERE id IN (SELECT helyszinId FROM Szorny GROUP BY helyszinId HAVING COUNT(*) >= 3);
 
--- 16. Töröljük az összes olyan játékost, akinek a felhasználója 'robiAFelhasznalo'.
-DELETE FROM Karakter WHERE felhasznaloId = (SELECT id FROM Felhasznalo WHERE nev = 'robiAFelhasznalo');
+-- 16. Válasszuk ki azokat a szervereket, amelyeken nincsenek olyan játékosok, akik online vannak.
+SELECT s.nev
+FROM Szerver s
+LEFT JOIN Karakter k ON s.id = k.szerverId AND k.onlineVan = TRUE
+WHERE k.id IS NULL;
 
 -- 17. Válasszuk ki az összes játékost, akik legalább 1000 tapasztalati ponttal rendelkeznek.
 SELECT nev FROM Karakter WHERE tapasztalatPont >= 1000;
+
+-- 18. Válasszuk ki azokat a boltokat, ahol legalább egy olyan felszerelés van, amit egyetlen játékos sem vásárolt meg.
+SELECT b.nev
+FROM Bolt b
+JOIN BoltFelszereles bf ON b.id = bf.boltId
+LEFT JOIN KarakterFelszereles kf ON bf.felszerelesId = kf.felszerelesId
+WHERE kf.felszerelesId IS NULL;
 
 -- 19. Válasszuk ki az összes olyan szörnyet, amely legalább 100 tapasztalati pontot ad.
 SELECT nev FROM Szorny WHERE tapasztalatPontotAd >= 100;
@@ -72,8 +96,8 @@ UPDATE Karakter SET onlineVan = FALSE WHERE Karakter.id = 1;
 -- 27. Válasszuk ki az összes olyan felszerelést, amelynek neve 'Varázskönyv' vagy 'Védelem pajzs'.
 SELECT nev FROM Felszereles WHERE nev IN ('Varázskönyv', 'Védelem pajzs');
 
--- 28. Töröljük az összes olyan képességet, amelynek sebzése 0 vagy kevesebb.
-DELETE FROM Kepesseg WHERE sebzes <= 0;
+-- 28. Töröljük az összes olyan képességet, amelynek sebzése 100 vagy több.
+DELETE FROM Kepesseg WHERE sebzes >= 100;
 
 -- 29. Válasszuk ki az összes olyan játékost, akik legalább egyszer párbajra hívhatóak.
 SELECT nev FROM Karakter WHERE parbajraHivhato = TRUE;
@@ -116,12 +140,3 @@ FROM Felszereles
 WHERE id IN (SELECT DISTINCT felszerelesId FROM KarakterFelszereles)
 AND nev LIKE '%Varázs%';
 
--- Online Karakterok csoport szerint
-CREATE PROCEDURE OnlineKarakterek()
-BEGIN
-    SELECT Csoport.nev AS Csoport, COUNT(Karakter.id) AS OnlineKarakterek
-    FROM Csoport
-    LEFT JOIN Karakter ON Csoport.id = Karakter.csoportId
-    WHERE Karakter.onlineVan = TRUE
-    GROUP BY Csoport.nev;
-END;
