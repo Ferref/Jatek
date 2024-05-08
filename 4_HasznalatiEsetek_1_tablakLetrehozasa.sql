@@ -2,24 +2,6 @@
 CREATE DATABASE IF NOT EXISTS Jatek;
 USE Jatek;
 
--- Kaszt tábla létrehozása
-CREATE TABLE IF NOT EXISTS Kaszt (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL UNIQUE,
-    eleteroModosito INT NOT NULL,
-    sebzesModosito INT NOT NULL
-);
-
--- Kepesseg tábla létrehozása
-CREATE TABLE IF NOT EXISTS Kepesseg (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL UNIQUE,
-    sebzes INT NOT NULL,
-    kasztId INT NOT NULL,
-    minimumSzint INT DEFAULT 1,
-    FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
-);
-
 -- Helyszin tábla létrehozása
 CREATE TABLE IF NOT EXISTS Helyszin (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,6 +32,25 @@ CREATE TABLE IF NOT EXISTS FelhasznaloSzerver (
     FOREIGN KEY (felhasznaloId) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
     PRIMARY KEY (szerverId, felhasznaloId)
 );
+
+-- Kaszt tábla létrehozása
+CREATE TABLE IF NOT EXISTS Kaszt (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nev VARCHAR(100) NOT NULL UNIQUE,
+    eleteroModosito INT NOT NULL,
+    sebzesModosito INT NOT NULL
+);
+
+-- Kepesseg tábla létrehozása
+CREATE TABLE IF NOT EXISTS Kepesseg (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nev VARCHAR(100) NOT NULL UNIQUE,
+    sebzes INT NOT NULL,
+    kasztId INT NOT NULL,
+    minimumSzint INT DEFAULT 1,
+    FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
+);
+
 
 -- Csoport tábla létrehozása
 CREATE TABLE IF NOT EXISTS Csoport (
@@ -88,28 +89,6 @@ CREATE TABLE IF NOT EXISTS Karakter (
     FOREIGN KEY (helyszinId) REFERENCES Helyszin(id) ON DELETE CASCADE
 );
 
--- Felszereles tábla létrehozása
-CREATE TABLE IF NOT EXISTS Felszereles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nev VARCHAR(100) NOT NULL UNIQUE,
-    kasztId INT,
-    sebzes INT NOT NULL,
-    eletero INT NOT NULL,
-    minimumSzint INT DEFAULT 1,
-    kategoria INT NOT NULL CHECK (kategoria BETWEEN 1 AND 9),
-    FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE
-    FOREIGN KEY (kategoria) REFERENCES FelszerelesKatMegn(katId) ON DELETE CASCADE
-);
-
--- KarakterFelszereles tábla létrehozása
-CREATE TABLE IF NOT EXISTS KarakterFelszereles (
-    karakterId INT,
-    felszerelesId INT,
-    felveve BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (karakterId) REFERENCES Karakter(id) ON DELETE CASCADE,
-    FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
-    PRIMARY KEY (karakterId, felszerelesId)
-);
 
 -- Szorny tábla létrehozása
 CREATE TABLE IF NOT EXISTS Szorny (
@@ -122,24 +101,6 @@ CREATE TABLE IF NOT EXISTS Szorny (
     aranyatDobhat INT NOT NULL,
     helyszinId INT,
     FOREIGN KEY (helyszinId) REFERENCES Helyszin(id) ON DELETE CASCADE
-);
-
--- SzornyFelszerelestDobhat tábla létrehozása
-CREATE TABLE IF NOT EXISTS SzornyFelszerelestDobhat (
-    szornyId INT,
-    felszerelesId INT,
-    FOREIGN KEY (szornyId) REFERENCES Szorny(id) ON DELETE CASCADE,
-    FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
-    PRIMARY KEY (szornyId, felszerelesId)
-);
-
--- BoltFelszereles tábla létrehozása
-CREATE TABLE IF NOT EXISTS BoltFelszereles (
-    boltId INT,
-    felszerelesId INT,
-    FOREIGN KEY (boltId) REFERENCES Bolt(id) ON DELETE CASCADE,
-    FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
-    PRIMARY KEY (boltId, felszerelesId)
 );
 
 -- Harcol tábla létrehozása
@@ -176,7 +137,40 @@ CREATE TABLE IF NOT EXISTS FelszerelesKatMegn (
     katNev VARCHAR(100) NOT NULL UNIQUE
 );
 
--- SzornyFelszDobhat tábla létrehozása
+-- Felszereles tábla létrehozása
+CREATE TABLE IF NOT EXISTS Felszereles (
+    id INT PRIMARY KEY,
+    nev VARCHAR(100) NOT NULL UNIQUE,
+    kasztId INT,
+    sebzes INT NOT NULL,
+    eletero INT NOT NULL,
+    minimumSzint INT DEFAULT 1,
+    kategoria INT NOT NULL CHECK (kategoria BETWEEN 1 AND 9),
+    FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE,
+    FOREIGN KEY (kategoria) REFERENCES FelszerelesKatMegn(katId) ON DELETE CASCADE
+);
+
+-- KarakterFelszereles tábla létrehozása
+CREATE TABLE IF NOT EXISTS KarakterFelszereles (
+    karakterId INT,
+    felszerelesId INT,
+    felveve BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (karakterId) REFERENCES Karakter(id) ON DELETE CASCADE,
+    FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
+    PRIMARY KEY (karakterId, felszerelesId)
+);
+
+
+-- BoltFelszereles tábla létrehozása
+CREATE TABLE IF NOT EXISTS BoltFelszereles (
+    boltId INT,
+    felszerelesId INT,
+    FOREIGN KEY (boltId) REFERENCES Bolt(id) ON DELETE CASCADE,
+    FOREIGN KEY (felszerelesId) REFERENCES Felszereles(id) ON DELETE CASCADE,
+    PRIMARY KEY (boltId, felszerelesId)
+);
+
+--  tábla létrehozása
 CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
     szornyId INT NOT NULL,
     felszId INT NOT NULL,
@@ -184,3 +178,4 @@ CREATE TABLE IF NOT EXISTS SzornyFelszDobhat (
     FOREIGN KEY (felszId) REFERENCES Felszereles(id) ON DELETE CASCADE,
     PRIMARY KEY (szornyId, felszId)
 );
+
