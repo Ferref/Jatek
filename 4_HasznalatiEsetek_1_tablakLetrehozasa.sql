@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS Parbaj (
     FOREIGN KEY (gyoztesId) REFERENCES Karakter(id) ON DELETE SET NULL
 );
 
--- FelszerelesKatMegn tábla létrehozása
-CREATE TABLE IF NOT EXISTS FelszerelesKatMegn (
+-- FelszKatMegn tábla létrehozása
+CREATE TABLE IF NOT EXISTS FelszKatMegn (
     katId INT AUTO_INCREMENT PRIMARY KEY,
     katNev VARCHAR(100) NOT NULL UNIQUE
 );
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS Felszereles (
     minimumSzint INT DEFAULT 1,
     kategoria INT NOT NULL CHECK (kategoria BETWEEN 1 AND 9),
     FOREIGN KEY (kasztId) REFERENCES Kaszt(id) ON DELETE CASCADE,
-    FOREIGN KEY (kategoria) REFERENCES FelszerelesKatMegn(katId) ON DELETE CASCADE
+    FOREIGN KEY (kategoria) REFERENCES FelszKatMegn(katId) ON DELETE CASCADE
 );
 
 -- KarakterFelszereles tábla létrehozása

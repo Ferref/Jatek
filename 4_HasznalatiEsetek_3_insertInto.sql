@@ -47,7 +47,7 @@ INSERT INTO Kepesseg (nev, sebzes, kasztId, minimumSzint) VALUES
 ('Tűzlövés', 140, 3, 1),
 ('Védelmi varázslat', 0, 3, 1),
 ('Tolvajlás', 0, 2, 1),
-('Pörölycsapás', 0, 200, 1);
+('Pörölycsapás', 200, 1, 1);
 
 
 -- Példa adatok beillesztése a Felszereles táblába
