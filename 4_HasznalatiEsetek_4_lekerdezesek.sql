@@ -16,7 +16,7 @@ SELECT nev FROM Helyszin WHERE minimumSzint <= 5;
 UPDATE Szorny SET aranyatDobhat = 60 WHERE nev = 'Ragadozó növények';
 
 -- 7. Válasszuk ki az összes játékost, akik online vannak.
-SELECT nev FROM Karakter WHERE online = TRUE;
+SELECT nev FROM Karakter WHERE onlineVan = TRUE;
 
 -- 8. Töröljük az összes olyan felszerelést, amelynek minimumSzint értéke nagyobb, mint 5.
 DELETE FROM Felszereles WHERE minimumSzint > 5;
@@ -67,7 +67,7 @@ DELETE FROM Karakter WHERE szint <= 2;
 SELECT nev FROM Csoport WHERE id IN (SELECT DISTINCT csoportId FROM Karakter WHERE nem = 'N');
 
 -- 26. Frissítsük a Karakter táblában az összes rekordot úgy, hogy az online értékük FALSE legyen.
-UPDATE Karakter SET online = FALSE WHERE Karakter.id = 1;
+UPDATE Karakter SET onlineVan = FALSE WHERE Karakter.id = 1;
 
 -- 27. Válasszuk ki az összes olyan felszerelést, amelynek neve 'Varázskönyv' vagy 'Védelem pajzs'.
 SELECT nev FROM Felszereles WHERE nev IN ('Varázskönyv', 'Védelem pajzs');
@@ -98,7 +98,7 @@ FROM Csoport c
 JOIN Karakter j ON c.id = j.csoportId
 WHERE c.nev LIKE '%Kalandorok%'
 GROUP BY c.id
-HAVING COUNT(j.id) >= 3 AND SUM(j.online) >= 3;
+HAVING COUNT(j.id) >= 3 AND SUM(j.onlineVan) >= 3;
 
 -- 36. Frissítsük a Szorny táblában azokat a szörnyeket, amelyeknek a tapasztalatPontotAd értéke legalább 100, úgy hogy a sebzésüket növeljük 20%-kal.
 UPDATE Szorny
@@ -117,11 +117,11 @@ WHERE id IN (SELECT DISTINCT felszerelesId FROM KarakterFelszereles)
 AND nev LIKE '%Varázs%';
 
 -- Online Karakterok csoport szerint
-CREATE PROCEDURE OnlineKarakterok()
+CREATE PROCEDURE OnlineKarakterek()
 BEGIN
-    SELECT Csoport.nev AS Csoport, COUNT(Karakter.id) AS OnlineKarakterok
+    SELECT Csoport.nev AS Csoport, COUNT(Karakter.id) AS OnlineKarakterek
     FROM Csoport
     LEFT JOIN Karakter ON Csoport.id = Karakter.csoportId
-    WHERE Karakter.online = TRUE
+    WHERE Karakter.onlineVan = TRUE
     GROUP BY Csoport.nev;
 END;
