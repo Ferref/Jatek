@@ -108,8 +108,8 @@ UPDATE Szorny SET aranyatDobhat = 50 WHERE eletero <= 500;
 -- 31. Töröljük az összes olyan játékost, aki nem rendelkezik felszereléssel.
 DELETE FROM Karakter WHERE id NOT IN (SELECT karakterId FROM KarakterFelszereles);
 
--- 32. Töröljük az összes olyan csapatot, amelynek nevében szerepel a 'Botrány'.
-DELETE FROM Csoport WHERE nev LIKE '%Botrány%';
+-- 32. Töröljük az összes olyan csapatot, amelynek nevében szerepel a 'Bátor'.
+DELETE FROM Csoport WHERE nev LIKE '%Bátor%';
 
 -- 33. Töröljük azokat a helyszíneket, amelyekhez egyetlen szörny sem tartozik, és azokhoz sem tartozik játékos.
 DELETE FROM Helyszin
@@ -129,14 +129,30 @@ UPDATE Szorny
 SET sebzes = sebzes * 1.2
 WHERE tapasztalatPontotAd >= 100;
 
--- 37. Frissítsük a Karakter táblában azokat a játékosokat, akiknek a felhasználója 'admin', úgy hogy a szintjüket növeljük 1-gyel.
+-- 37. Frissítsük a Karakter táblában azokat a játékosokat, akiknek a felhasználója 'MarciKarakter1', úgy hogy a szintjüket növeljük 1-gyel.
 UPDATE Karakter
 SET szint = szint + 1
 WHERE felhasznaloId = (SELECT id FROM Felhasznalo WHERE nev = 'MarciKarakter1');
 
--- 38. Válasszuk ki azokat a felszereléseket, amelyeket legalább egy játékos használ, és a felszerelés neve tartalmazza a 'Magic' szót.
+-- 38. Válasszuk ki azokat a felszereléseket, amelyeket legalább egy játékos használ, és a felszerelés neve tartalmazza a 'Varázs' szót.
 SELECT nev
 FROM Felszereles
 WHERE id IN (SELECT DISTINCT felszerelesId FROM KarakterFelszereles)
 AND nev LIKE '%Varázs%';
+
+-- 39. Válasszuk ki azokat a helyszíneket, ahol a legmagasabb a szörnyek átlagos életereje.
+SELECT h.nev
+FROM Helyszin h
+JOIN Szorny s ON h.id = s.helyszinId
+GROUP BY h.nev
+ORDER BY AVG(s.eletero) DESC
+LIMIT 1;
+
+-- 40. Válasszuk ki azokat a boltokat, ahol a legtöbb különböző felszerelést lehet megvásárolni.
+SELECT b.nev
+FROM Bolt b
+JOIN BoltFelszereles bf ON b.id = bf.boltId
+GROUP BY b.id
+ORDER BY COUNT(DISTINCT bf.felszerelesId) DESC
+LIMIT 1;
 
