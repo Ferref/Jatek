@@ -46,10 +46,6 @@ DROP TRIGGER IF EXISTS felszereles_elad;
 DROP TRIGGER IF EXISTS felszereles_vasarol;
 
 
-
-
-
-
 -- Triger létrehozása a FelhasznaloSzerver táblához
 DELIMITER //
 CREATE TRIGGER ellenoriz_szerver_karakterek
@@ -70,10 +66,8 @@ BEGIN
 END//
 DELIMITER ;
 
-
 -- TRIGGER létrehozása a Kaszt táblához
 DELIMITER //
-
 CREATE TRIGGER kaszt_modositok
 BEFORE INSERT ON Kaszt
 FOR EACH ROW
@@ -93,10 +87,8 @@ END;
 DELIMITER ;
 
 
-
 -- TRIGGER létrehozása a Karakter táblához
 DELIMITER //
-
 CREATE TRIGGER check_helyszin_minimum_szint
 BEFORE INSERT ON Karakter
 FOR EACH ROW
@@ -116,6 +108,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 -- TRIGGER létrehozása a Karakter táblához, Karakter szintje ne legyen nagyobb mint 100
 DELIMITER //
@@ -151,6 +144,7 @@ END;
 //
 DELIMITER ;
 
+
 -- Felszereles felvesz TRIGGER
 DELIMITER //
 
@@ -175,6 +169,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 -- TRIGGER létrehozása a Csoport táblához
 DELIMITER //
@@ -248,6 +243,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 
 
