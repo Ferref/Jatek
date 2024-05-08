@@ -244,6 +244,59 @@ END;
 //
 DELIMITER ;
 
+DELIMITER //
+
+CREATE TRIGGER check_harc_kovetelmeny_and_szorny_legyozese
+BEFORE INSERT ON Harcol
+FOR EACH ROW
+BEGIN
+    DECLARE karakter_szint INT;
+    DECLARE karakter_sebzes INT;
+    DECLARE szorny_szint INT;
+    DECLARE szorny_sebzes INT;
+    DECLARE tapasztalatPontotAd INT;
+    
+    -- Kivonjuk a karakter és a szörny tulajdonságait
+    SELECT k.szint, k.sebzes, s.szint, s.sebzes, s.tapasztalatPontotAd INTO karakter_szint, karakter_sebzes, szorny_szint, szorny_sebzes, tapasztalatPontotAd
+    FROM Karakter k
+    JOIN Szorny s ON NEW.karakter1Id = k.id AND NEW.szornyId = s.id;
+    
+    -- Ellenőrizzük a harc követelményeit
+    IF karakter_szint >= szorny_szint AND karakter_sebzes >= szorny_sebzes THEN
+        -- Meghatározzuk a győztest
+        IF karakter_szint + karakter_sebzes >= szorny_szint + szorny_sebzes THEN
+            SET NEW.gyoztesId = NEW.karakter1Id;
+        ELSE
+            SET NEW.gyoztesId = NEW.szornyId;
+        END IF;
+        
+        -- Ha a karakter a győztes
+        IF NEW.gyoztesId = NEW.karakter1Id THEN
+            -- Számítjuk a kapott tapasztalatpontot
+            SET @tapasztalatPont := tapasztalatPontotAd;
+            
+            -- Ha a karakter csoportban van
+            IF EXISTS (SELECT 1 FROM Karakter WHERE id = NEW.karakter1Id AND csoportId IS NOT NULL) THEN
+                -- Számítjuk a csoporttagok számát
+                SET @csoport_tagok_szama := (SELECT COUNT(*) FROM Karakter WHERE csoportId = (SELECT csoportId FROM Karakter WHERE id = NEW.karakter1Id));
+                
+                -- Számítjuk a kapott tapasztalatpontot csoporttagok száma alapján
+                SET @tapasztalatPont := @tapasztalatPont + (tapasztalatPontotAd * @csoport_tagok_szama / 10);
+            END IF;
+            
+            -- Frissítjük a győztes karakter tapasztalatpontjait
+            UPDATE Karakter
+            SET tapasztalatPont = tapasztalatPont + @tapasztalatPont
+            WHERE id = NEW.karakter1Id;
+        END IF;
+    END IF;
+END//
+
+DELIMITER ;
+
+
+
+
 
 
 
